@@ -1,0 +1,1 @@
+tanzu package installed cert-manager -n cert-manager
