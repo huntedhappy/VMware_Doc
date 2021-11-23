@@ -1,0 +1,1 @@
+tanzu package installed update external-dns -n tanzu-system-service-discovery

@@ -1,1 +1,1 @@
-tanzu package installed delete fluentbit -n tanzu-system-logging
+tanzu package installed delete fluent-bit -n tanzu-system-logging
