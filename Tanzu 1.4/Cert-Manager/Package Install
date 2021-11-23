@@ -1,0 +1,5 @@
+kubectl get package -A
+
+tanzu package install cert-manager -p cert-manager.tanzu.vmware.com -v 1.1.0+vmware.1-tkg.2 -n cert-manager --create-namespace
+
+kubectl get packageinstalls -A
