@@ -1,0 +1,1 @@
+tanzu package installed delete grafana -n tanzu-system-dashboards

@@ -1,0 +1,1 @@
+tanzu package installed delete prometheus -n tanzu-system-monitoring
