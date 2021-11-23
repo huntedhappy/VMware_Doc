@@ -1,0 +1,17 @@
+dns=`k get pod -n tanzu-system-service-discovery | awk '/external-dns/ {print $1}'`
+
+kubectl logs $dns -n tanzu-system-service-discovery -f
+
+
+Log-Contents
+time="2021-11-23T07:55:23Z" level=error msg="AXFR error: dns: bad xfr rcode: 5"
+time="2021-11-23T07:55:23Z" level=info msg="Adding RR: notary.harbor.tkg.io 0 A 10.253.112.205"
+time="2021-11-23T07:55:23Z" level=info msg="Adding RR: harbor.tkg.io 0 A 10.253.112.205"
+time="2021-11-23T07:55:23Z" level=info msg="Adding RR: grafana.tkg.io 0 A 10.253.112.205"
+time="2021-11-23T07:55:23Z" level=info msg="Adding RR: prometheus.tkg.io 0 A 10.253.112.205"
+time="2021-11-23T07:55:23Z" level=info msg="Adding RR: kibana.tkg.io 0 A 10.253.112.205"
+time="2021-11-23T07:55:23Z" level=info msg="Adding RR: external-dns-notary.harbor.tkg.io 0 TXT \"heritage=external-dns,external-dns/owner=k8s,external-dns/resource=HTTPProxy/tanzu-system-registry/harbor-httpproxy-notary\""
+time="2021-11-23T07:55:23Z" level=info msg="Adding RR: external-dns-harbor.tkg.io 0 TXT \"heritage=external-dns,external-dns/owner=k8s,external-dns/resource=HTTPProxy/tanzu-system-registry/harbor-httpproxy\""
+time="2021-11-23T07:55:23Z" level=info msg="Adding RR: external-dns-grafana.tkg.io 0 TXT \"heritage=external-dns,external-dns/owner=k8s,external-dns/resource=HTTPProxy/tanzu-system-dashboards/grafana-httpproxy\""
+time="2021-11-23T07:55:23Z" level=info msg="Adding RR: external-dns-prometheus.tkg.io 0 TXT \"heritage=external-dns,external-dns/owner=k8s,external-dns/resource=HTTPProxy/tanzu-system-monitoring/prometheus-httpproxy\""
+time="2021-11-23T07:55:23Z" level=info msg="Adding RR: external-dns-kibana.tkg.io 0 TXT \"heritage=external-dns,external-dns/owner=k8s,external-dns/resource=ingress/elasticsearch/elasticsearch-kibana\""
