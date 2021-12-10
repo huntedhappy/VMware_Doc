@@ -1,0 +1,53 @@
+kubectl config use-context {mgmt cluster}
+
+--------------------------------------------------
+cat << EOF | tee avi-clusterIP.yaml
+
+
+apiVersion: networking.tkg.tanzu.vmware.com/v1alpha1
+kind: AKODeploymentConfig
+metadata:
+  name: test-node-network-list
+spec:
+  adminCredentialRef:
+    name: avi-controller-credentials
+    namespace: tkg-system-networking
+  certificateAuthorityRef:
+    name: avi-controller-ca
+    namespace: tkg-system-networking
+  cloudName: Default-Cloud
+  clusterSelector:
+    matchLabels:
+      ako-l7-clusterip-01: "true"
+  controller: avi.tkg.io
+  dataNetwork:
+    cidr: 192.168.21.0/24
+    name: pg-tkgm-192.168.21.0
+  extraConfigs:
+    disableStaticRouteSync: true
+    image:
+      pullPolicy: IfNotPresent
+      repository: projects.registry.vmware.com/tkg/ako
+      version: v1.3.2_vmware.1
+    ingress:
+      disableIngressClass: true
+      nodeNetworkList:
+        - cidrs:
+            - 192.168.21.0/24
+          networkName: pg-tkgm-192.168.21.0
+      serviceType: ClusterIP
+      shardVSSize: SMALL
+  serviceEngineGroup: Default-Group
+
+EOF
+----------------------------------------------------------
+kubectl apply -f avi-clusterIP.yaml
+
+kubectl label cluster tkc-prod ako-l7-clusterip-01="true"
+
+kubectl config use-context {tkc cluster}
+
+kubectl get cm avi-k8s-config -n avi-system -o=jsonpath='{.data.serviceType}'
+
+## NodePort > ClusterIP로 변경이 되었는지 확인 후 Pod 삭제
+kubectl delete pod ako-0 -n avi-system
