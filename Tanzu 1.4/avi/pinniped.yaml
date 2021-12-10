@@ -1,0 +1,61 @@
+vi pinniped-supervisor-svc-overlay.yaml
+
+---------------------------------------------
+
+
+#@ load("@ytt:overlay", "overlay")
+#@overlay/match by=overlay.subset({"kind": "Service", "metadata": {"name": "pinniped-supervisor", "namespace": "pinniped-supervisor"}})
+---
+#@overlay/replace
+spec:
+  type: LoadBalancer
+  selector:
+    app: pinniped-supervisor
+  ports:
+    - name: https
+      protocol: TCP
+      port: 443
+      targetPort: 8443
+
+#@ load("@ytt:overlay", "overlay")
+#@overlay/match by=overlay.subset({"kind": "Service", "metadata": {"name": "dexsvc", "namespace": "tanzu-system-auth"}}), missing_ok=True
+---
+#@overlay/replace
+spec:
+  type: LoadBalancer
+  selector:
+    app: dex
+  ports:
+    - name: dex
+      protocol: TCP
+      port: 443
+      targetPort: https
+
+---------------------------------------------
+cat pinniped-supervisor-svc-overlay.yaml | base64 -w 0
+### base64 변경
+I0AgbG9hZCgiQHl0dDpvdmVybGF5IiwgIm92ZXJsYXkiKQojQG92ZXJsYXkvbWF0Y2ggYnk9b3ZlcmxheS5zdWJzZXQoeyJraW5kIjogIlNlcnZpY2UiLCAibWV0YWRhdGEiOiB7Im5hbWUiOiAicGlubmlwZWQtc3VwZXJ2aXNvciIsICJuYW1lc3BhY2UiOiAicGlubmlwZWQtc3VwZXJ2aXNvciJ9fSkKLS0tCiNAb3ZlcmxheS9yZXBsYWNlCnNwZWM6CiAgdHlwZTogTG9hZEJhbGFuY2VyCiAgc2VsZWN0b3I6CiAgICBhcHA6IHBpbm5pcGVkLXN1cGVydmlzb3IKICBwb3J0czoKICAgIC0gbmFtZTogaHR0cHMKICAgICAgcHJvdG9jb2w6IFRDUAogICAgICBwb3J0OiA0NDMKICAgICAgdGFyZ2V0UG9ydDogODQ0MwoKI0AgbG9hZCgiQHl0dDpvdmVybGF5IiwgIm92ZXJsYXkiKQojQG92ZXJsYXkvbWF0Y2ggYnk9b3ZlcmxheS5zdWJzZXQoeyJraW5kIjogIlNlcnZpY2UiLCAibWV0YWRhdGEiOiB7Im5hbWUiOiAiZGV4c3ZjIiwgIm5hbWVzcGFjZSI6ICJ0YW56dS1zeXN0ZW0tYXV0aCJ9fSksIG1pc3Npbmdfb2s9VHJ1ZQotLS0KI0BvdmVybGF5L3JlcGxhY2UKc3BlYzoKICB0eXBlOiBMb2FkQmFsYW5jZXIKICBzZWxlY3RvcjoKICAgIGFwcDogZGV4CiAgcG9ydHM6CiAgICAtIG5hbWU6IGRleAogICAgICBwcm90b2NvbDogVENQCiAgICAgIHBvcnQ6IDQ0MwogICAgICB0YXJnZXRQb3J0OiBodHRwcwo=
+
+### secret 찾기
+kubectl get secret -n tkg-system | grep pinniped
+
+### base64로 변경한 부분 빨간색 된 부분 붙여 넣기
+kubectl -n tkg-system patch secret tkgm-pinniped-addon -p '{"data": {"overlays.yaml": "I0AgbG9hZCgiQHl0dDpvdmVybGF5IiwgIm92ZXJsYXkiKQojQG92ZXJsYXkvbWF0Y2ggYnk9b3ZlcmxheS5zdWJzZXQoeyJraW5kIjogIlNlcnZpY2UiLCAibWV0YWRhdGEiOiB7Im5hbWUiOiAicGlubmlwZWQtc3VwZXJ2aXNvciIsICJuYW1lc3BhY2UiOiAicGlubmlwZWQtc3VwZXJ2aXNvciJ9fSkKLS0tCiNAb3ZlcmxheS9yZXBsYWNlCnNwZWM6CiAgdHlwZTogTG9hZEJhbGFuY2VyCiAgc2VsZWN0b3I6CiAgICBhcHA6IHBpbm5pcGVkLXN1cGVydmlzb3IKICBwb3J0czoKICAgIC0gbmFtZTogaHR0cHMKICAgICAgcHJvdG9jb2w6IFRDUAogICAgICBwb3J0OiA0NDMKICAgICAgdGFyZ2V0UG9ydDogODQ0MwoKI0AgbG9hZCgiQHl0dDpvdmVybGF5IiwgIm92ZXJsYXkiKQojQG92ZXJsYXkvbWF0Y2ggYnk9b3ZlcmxheS5zdWJzZXQoeyJraW5kIjogIlNlcnZpY2UiLCAibWV0YWRhdGEiOiB7Im5hbWUiOiAiZGV4c3ZjIiwgIm5hbWVzcGFjZSI6ICJ0YW56dS1zeXN0ZW0tYXV0aCJ9fSksIG1pc3Npbmdfb2s9VHJ1ZQotLS0KI0BvdmVybGF5L3JlcGxhY2UKc3BlYzoKICB0eXBlOiBMb2FkQmFsYW5jZXIKICBzZWxlY3RvcjoKICAgIGFwcDogZGV4CiAgcG9ydHM6CiAgICAtIG5hbWU6IGRleAogICAgICBwcm90b2NvbDogVENQCiAgICAgIHBvcnQ6IDQ0MwogICAgICB0YXJnZXRQb3J0OiBodHRwcwo="}}'
+
+
+### SVC 확인
+kubectl get svc -A |egrep "pinniped-supervisor|dex"
+
+### jobservice 삭제
+kubectl delete jobs pinniped-post-deploy-job -n pinniped-supervisor
+
+### jobservice 확인이 되어야함 
+kubectl get job pinniped-post-deploy-job -n pinniped-supervisor
+
+#### 브라우저 없을 때 사용 
+export TANZU_CLI_PINNIPED_AUTH_LOGIN_SKIP_BROWSER=true
+
+tanzu management-cluster kubeconfig get --export-file /tmp/ldaps-tkg-mgmt-kubeconfig
+
+### 권한이 없다고 나오므로 Clusterrolebinding 해주어야함
+kubectl --kubeconfig=/tmp/ldaps-tkg-mgmt-kubeconfig get nodes
