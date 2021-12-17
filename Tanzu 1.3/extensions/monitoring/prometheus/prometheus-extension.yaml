@@ -1,0 +1,349 @@
+# prometheus k14s objects managed by kapp-controller
+---
+apiVersion: kappctrl.k14s.io/v1alpha1
+kind: App
+metadata:
+  name: prometheus
+  namespace: tanzu-system-monitoring
+  annotations:
+    tmc.cloud.vmware.com/managed: "false"
+spec:
+  syncPeriod: 5m
+  serviceAccountName: prometheus-extension-sa
+  fetch:
+    - image:
+        url: harbor-infra.tkg.io/library/tkg-extensions-templates:v1.3.1_vmware.1
+  template:
+    - ytt:
+        ignoreUnknownComments: true
+        paths:
+          - tkg-extensions/common
+          - tkg-extensions/monitoring/prometheus
+        inline:
+          paths:
+            prometheus.yaml: |
+              #@ load("@ytt:overlay", "overlay")
+              #@overlay/match by=overlay.subset({"kind": "ConfigMap", "metadata": {"name": "prometheus-server"}})
+              ---
+              data:
+                prometheus.yml: |
+                  global:
+                    evaluation_interval: 1m
+                    scrape_interval: 1m
+                    scrape_timeout: 10s
+                  rule_files:
+                    - /etc/config/recording_rules.yml
+                    - /etc/config/alerting_rules.yml
+                    - /etc/config/alerting_rules_kubeapiserver.yml
+                  scrape_configs:
+                  - job_name: prometheus
+                    static_configs:
+                    - targets:
+                      - localhost:9090
+                    bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+
+                  - job_name: 'kube-api-blackbox'
+                    metrics_path: /probe
+                    params:
+                      module: [kube-api]
+                    static_configs:
+                     - targets: ['https://kubernetes.default.svc/api']
+                    relabel_configs:
+                     - source_labels: [__address__]
+                       target_label: __param_target
+                     - source_labels: [__param_target]
+                       target_label: instance
+                     - target_label: __address__
+                       replacement: exporter-x509-certificate-exporter-headless:9793 # The blackbox exporter.
+
+                  - job_name: 'kube-state-metrics'
+                    static_configs:
+                    - targets: ['prometheus-kube-state-metrics.tanzu-system-monitoring.svc.cluster.local:8080']
+
+                  - job_name: 'node-exporter'
+                    static_configs:
+                    - targets: ['prometheus-node-exporter.tanzu-system-monitoring.svc.cluster.local:9100']
+
+                  - job_name: kubernetes-apiservers
+                    kubernetes_sd_configs:
+                    - role: endpoints
+                    relabel_configs:
+                    - action: keep
+                      regex: default;kubernetes;https
+                      source_labels:
+                      - __meta_kubernetes_namespace
+                      - __meta_kubernetes_service_name
+                      - __meta_kubernetes_endpoint_port_name
+                    scheme: https
+                    tls_config:
+                      ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+                      insecure_skip_verify: true
+                    bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+
+                  - job_name: kubernetes-nodes
+                    kubernetes_sd_configs:
+                    - role: node
+                    relabel_configs:
+                    - action: labelmap
+                      regex: __meta_kubernetes_node_label_(.+)
+                    - replacement: kubernetes.default.svc:443
+                      target_label: __address__
+                    - regex: (.+)
+                      replacement: /api/v1/nodes/$1/proxy/metrics
+                      source_labels:
+                      - __meta_kubernetes_node_name
+                      target_label: __metrics_path__
+                    scheme: https
+                    tls_config:
+                      ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+                      insecure_skip_verify: true
+                    bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+
+                  - job_name: kubernetes-nodes-cadvisor
+                    kubernetes_sd_configs:
+                    - role: node
+                    relabel_configs:
+                    - action: labelmap
+                      regex: __meta_kubernetes_node_label_(.+)
+                    - replacement: kubernetes.default.svc:443
+                      target_label: __address__
+                    - regex: (.+)
+                      replacement: /api/v1/nodes/$1/proxy/metrics/cadvisor
+                      source_labels:
+                      - __meta_kubernetes_node_name
+                      target_label: __metrics_path__
+                    scheme: https
+                    tls_config:
+                      ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+                      insecure_skip_verify: true
+                    bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+
+                  - job_name: kubernetes-service-endpoints
+                    kubernetes_sd_configs:
+                    - role: endpoints
+                    relabel_configs:
+                    - action: keep
+                      regex: true
+                      source_labels:
+                      - __meta_kubernetes_service_annotation_prometheus_io_scrape
+                    - action: replace
+                      regex: (https?)
+                      source_labels:
+                      - __meta_kubernetes_service_annotation_prometheus_io_scheme
+                      target_label: __scheme__
+                    - action: replace
+                      regex: (.+)
+                      source_labels:
+                      - __meta_kubernetes_service_annotation_prometheus_io_path
+                      target_label: __metrics_path__
+                    - action: replace
+                      regex: ([^:]+)(?::\d+)?;(\d+)
+                      replacement: $1:$2
+                      source_labels:
+                      - __address__
+                      - __meta_kubernetes_service_annotation_prometheus_io_port
+                      target_label: __address__
+                    - action: labelmap
+                      regex: __meta_kubernetes_service_label_(.+)
+                    - action: replace
+                      source_labels:
+                      - __meta_kubernetes_namespace
+                      target_label: kubernetes_namespace
+                    - action: replace
+                      source_labels:
+                      - __meta_kubernetes_service_name
+                      target_label: kubernetes_name
+                    - action: replace
+                      source_labels:
+                      - __meta_kubernetes_pod_node_name
+                      target_label: kubernetes_node
+
+                  - job_name: prometheus-pushgateway
+                    kubernetes_sd_configs:
+                    - role: service
+                    relabel_configs:
+                    - action: keep
+                      regex: pushgateway
+                      source_labels:
+                      - __meta_kubernetes_service_annotation_prometheus_io_probe
+
+                  - job_name: kubernetes-services
+                    kubernetes_sd_configs:
+                    - role: service
+                    metrics_path: /probe
+                    params:
+                      module:
+                      - http_2xx
+                    relabel_configs:
+                    - action: keep
+                      regex: true
+                      source_labels:
+                      - __meta_kubernetes_service_annotation_prometheus_io_probe
+                    - source_labels:
+                      - __address__
+                      target_label: __param_target
+                    - replacement: blackbox
+                      target_label: __address__
+                    - source_labels:
+                      - __param_target
+                      target_label: instance
+                    - action: labelmap
+                      regex: __meta_kubernetes_service_label_(.+)
+                    - source_labels:
+                      - __meta_kubernetes_namespace
+                      target_label: kubernetes_namespace
+                    - source_labels:
+                      - __meta_kubernetes_service_name
+                      target_label: kubernetes_name
+
+                  - job_name: kubernetes-pods
+                    kubernetes_sd_configs:
+                    - role: pod
+                    relabel_configs:
+                    - action: keep
+                      regex: true
+                      source_labels:
+                      - __meta_kubernetes_pod_annotation_prometheus_io_scrape
+                    - action: replace
+                      regex: (.+)
+                      source_labels:
+                      - __meta_kubernetes_pod_annotation_prometheus_io_path
+                      target_label: __metrics_path__
+                    - action: replace
+                      regex: ([^:]+)(?::\d+)?;(\d+)
+                      replacement: $1:$2
+                      source_labels:
+                      - __address__
+                      - __meta_kubernetes_pod_annotation_prometheus_io_port
+                      target_label: __address__
+                    - action: labelmap
+                      regex: __meta_kubernetes_pod_label_(.+)
+                    - action: replace
+                      source_labels:
+                      - __meta_kubernetes_namespace
+                      target_label: kubernetes_namespace
+                    - action: replace
+                      source_labels:
+                      - __meta_kubernetes_pod_name
+                      target_label: kubernetes_pod_name
+
+                  alerting:
+                    alertmanagers:
+                    - scheme: http
+                      static_configs:
+                      - targets:
+                        - "prometheus-alertmanager.tanzu-system-monitoring.svc:9093"
+                    - kubernetes_sd_configs:
+                        - role: pod
+                      tls_config:
+                        ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+                      bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+                      relabel_configs:
+                      - source_labels: [__meta_kubernetes_namespace]
+                        regex: default
+                        action: keep
+                      - source_labels: [__meta_kubernetes_pod_label_app]
+                        regex: prometheus
+                        action: keep
+                      - source_labels: [__meta_kubernetes_pod_label_component]
+                        regex: alertmanager
+                        action: keep
+                      - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_probe]
+                        regex: .*
+                        action: keep
+                      - source_labels: [__meta_kubernetes_pod_container_port_number]
+                        regex:
+                        action: drop
+            exporter-ds.yaml: |
+              #@ load("@ytt:overlay", "overlay")
+              #@overlay/match by=overlay.subset({"kind": "DaemonSet", "metadata": {"name": "prometheus-node-exporter"}})
+              ---
+              spec:
+                template:
+                  spec:
+                    containers:
+                    #@overlay/match missing_ok=True
+                    #@overlay/match by="name"
+                    - name: prometheus-node-exporter
+                      #@overlay/match by=overlay.all
+                      #@overlay/replace
+                      args:
+                      - --path.procfs=/host/proc
+                      - --path.sysfs=/host/sys
+                      - --trim-path-components=3
+                      - --watch-file=/mnt/watch/file-9dff78b77fe2f4b0f34f77796df3fea5983e5d4b//var/lib/kubelet/pki/kubelet-client-current.pem
+                      - --watch-file=/mnt/watch/file-24d5fa06386fdaf0d20c51e47b92012ea665b9f5//etc/kubernetes/pki/apiserver.crt
+                      - --watch-file=/mnt/watch/file-ec8d93d5f83aaefbf9d8c0a3f9643c6bfaffe310//etc/kubernetes/pki/apiserver-etcd-client.crt
+                      - --watch-file=/mnt/watch/file-904ae9261099d11adf0c9202070a51aae8a320e2//etc/kubernetes/pki/apiserver-kubelet-client.crt
+                      - --watch-file=/mnt/watch/file-15d8ed7db7457d4f5108195ceb52a124a8703898//etc/kubernetes/pki/ca.crt
+                      - --watch-file=/mnt/watch/file-99c1687bfbcf4396bdf08131c2971b798d8eb94f//etc/kubernetes/pki/front-proxy-ca.crt
+                      - --watch-file=/mnt/watch/file-dfdaa9ca375647a99973f96da9f7fd05a44e5e4f//etc/kubernetes/pki/front-proxy-client.crt
+                      - --watch-file=/mnt/watch/file-3642e1c1dd6ed90cba49e7452088e5041441ca65//etc/kubernetes/pki/etcd/ca.crt
+                      - --watch-file=/mnt/watch/file-b86beb70611cabc608c7d5c2748d4c7c2850c9bc//etc/kubernetes/pki/etcd/healthcheck-client.crt
+                      - --watch-file=/mnt/watch/file-8aab373cf6e572c2c86696ccdb24d0f300e008bb//etc/kubernetes/pki/etcd/peer.crt
+                      - --watch-file=/mnt/watch/file-99efa9a2170f5bab53446fc2b983ad325b22a113//etc/kubernetes/pki/etcd/server.crt
+                      - --watch-kubeconf=/mnt/watch/kube-35a4fcc6ab089d789fecaeed428cc8392148766a//etc/kubernetes/admin.conf
+                      - --watch-kubeconf=/mnt/watch/kube-41a6b8b147ef309a70619cafcfeb8961b3c29cae//etc/kubernetes/controller-manager.conf
+                      - --watch-kubeconf=/mnt/watch/kube-ee9e4e203c758bb95ec439d60c16fb4e8854efaf//etc/kubernetes/scheduler.conf
+                      - --max-cache-duration=300s
+                      ports:
+                      - name: metrics
+                        containerPort: 9100
+                        hostPort: 9100
+                      resources: {}
+                      volumeMounts:
+                      - name: proc
+                        mountPath: /host/proc
+                        readOnly: true
+                      - name: sys
+                        mountPath: /host/sys
+                        readOnly: true
+                      - mountPath: /mnt/watch/file-9dff78b77fe2f4b0f34f77796df3fea5983e5d4b//var/lib/kubelet/pki
+                        name: file-9dff78b77fe2f4b0f34f77796df3fea5983e5d4b
+                        readOnly: true
+                      - mountPath: /mnt/watch/file-24d5fa06386fdaf0d20c51e47b92012ea665b9f5//etc/kubernetes/pki
+                        name: file-24d5fa06386fdaf0d20c51e47b92012ea665b9f5
+                        readOnly: true
+                      - mountPath: /mnt/watch/file-ec8d93d5f83aaefbf9d8c0a3f9643c6bfaffe310//etc/kubernetes/pki
+                        name: file-ec8d93d5f83aaefbf9d8c0a3f9643c6bfaffe310
+                        readOnly: true
+                      - mountPath: /mnt/watch/file-904ae9261099d11adf0c9202070a51aae8a320e2//etc/kubernetes/pki
+                        name: file-904ae9261099d11adf0c9202070a51aae8a320e2
+                        readOnly: true
+                      - mountPath: /mnt/watch/file-15d8ed7db7457d4f5108195ceb52a124a8703898//etc/kubernetes/pki
+                        name: file-15d8ed7db7457d4f5108195ceb52a124a8703898
+                        readOnly: true
+                      - mountPath: /mnt/watch/file-99c1687bfbcf4396bdf08131c2971b798d8eb94f//etc/kubernetes/pki
+                        name: file-99c1687bfbcf4396bdf08131c2971b798d8eb94f
+                        readOnly: true
+                      - mountPath: /mnt/watch/file-dfdaa9ca375647a99973f96da9f7fd05a44e5e4f//etc/kubernetes/pki
+                        name: file-dfdaa9ca375647a99973f96da9f7fd05a44e5e4f
+                        readOnly: true
+                      - mountPath: /mnt/watch/file-3642e1c1dd6ed90cba49e7452088e5041441ca65//etc/kubernetes/pki/etcd
+                        name: file-3642e1c1dd6ed90cba49e7452088e5041441ca65
+                        readOnly: true
+                      - mountPath: /mnt/watch/file-b86beb70611cabc608c7d5c2748d4c7c2850c9bc//etc/kubernetes/pki/etcd
+                        name: file-b86beb70611cabc608c7d5c2748d4c7c2850c9bc
+                        readOnly: true
+                      - mountPath: /mnt/watch/file-8aab373cf6e572c2c86696ccdb24d0f300e008bb//etc/kubernetes/pki/etcd
+                        name: file-8aab373cf6e572c2c86696ccdb24d0f300e008bb
+                        readOnly: true
+                      - mountPath: /mnt/watch/file-99efa9a2170f5bab53446fc2b983ad325b22a113//etc/kubernetes/pki/etcd
+                        name: file-99efa9a2170f5bab53446fc2b983ad325b22a113
+                        readOnly: true
+                      - mountPath: /mnt/watch/kube-35a4fcc6ab089d789fecaeed428cc8392148766a//etc/kubernetes
+                        name: kube-35a4fcc6ab089d789fecaeed428cc8392148766a
+                        readOnly: true
+                      - mountPath: /mnt/watch/kube-41a6b8b147ef309a70619cafcfeb8961b3c29cae//etc/kubernetes
+                        name: kube-41a6b8b147ef309a70619cafcfeb8961b3c29cae
+                        readOnly: true
+                      - mountPath: /mnt/watch/kube-ee9e4e203c758bb95ec439d60c16fb4e8854efaf//etc/kubernetes
+                        name: kube-ee9e4e203c758bb95ec439d60c16fb4e8854efaf
+                        readOnly: true
+              
+          pathsFrom:
+            - secretRef:
+                name: prometheus-data-values
+  deploy:
+    - kapp:
+        rawOptions: ["--wait-timeout=5m"]

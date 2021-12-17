@@ -1,0 +1,145 @@
+apiVersion: v1
+items:
+- apiVersion: bootstrap.cluster.x-k8s.io/v1alpha3
+  kind: KubeadmConfigTemplate
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"bootstrap.cluster.x-k8s.io/v1alpha3","kind":"KubeadmConfigTemplate","metadata":{"annotations":{},"name":"tkc-prod-md-0","namespace":"default"},"spec":{"template":{"spec":{"files":[{"content":"-----BEGIN CERTIFICATE-----\nMIIFszCCA5ugAwIBAgIUc1duG0xL1mMXia3XnB9Qg4NY9nswDQYJKoZIhvcNAQEN\nBQAwaTELMAkGA1UEBhMCQ04xEDAOBgNVBAgMB0JlaWppbmcxEDAOBgNVBAcMB0Jl\naWppbmcxEDAOBgNVBAoMB2V4YW1wbGUxETAPBgNVBAsMCFBlcnNvbmFsMREwDwYD\nVQQDDAgqLnRrZy5pbzAeFw0yMTA5MDgyMzE5MDZaFw0zMTA5MDYyMzE5MDZaMGkx\nCzAJBgNVBAYTAkNOMRAwDgYDVQQIDAdCZWlqaW5nMRAwDgYDVQQHDAdCZWlqaW5n\nMRAwDgYDVQQKDAdleGFtcGxlMREwDwYDVQQLDAhQZXJzb25hbDERMA8GA1UEAwwI\nKi50a2cuaW8wggIiMA0GCSqGSIb3DQEBAQUAA4ICDwAwggIKAoICAQDGmDK2wCKp\nSIkhNQ6xGzAgbVlxw2SAuXd4BDH8nHZ8qq9kgpzsYzFOxW8tZlfxXt5PQ8yKBBrq\n0MqNCg1VIg+5QFM+quXJBBQUTKkIhnGzaleql4cBwrjlR4BIcAWdlzOVnsH6UWu0\nbvCHMopV8QZ7C+0j27GZVsahVhfx/G6i2/ToSYdCIp8ZoJTxyDY12xvlg+OX7//8\nyurUCOPYuk/vJSVhkUqEfm9UDMjan9VPU2uCMZevh+Fe11quYVHXzIsEi6QyVCG6\n0ro6Jmt59r8c7p5UwBitJvoOfLThctpz3khSG9EtagVXj8C5z7It7TmGxwvgx66W\n2zrcIxkuidMEkq/bTepgmy3XPWaOuac4wiYD4llkC8ZTsdzBos4Q2/U0v2/AugjI\nVMOvV0J1D8digpOp+RRA8XcJH50pwatsn1dz5mrYARxLLYdqUBXCuNuQdgQ6Kzd4\nlc/oSOuVclALrnR48iDhvHWyfeyQetvxpQhXv1bP5EiEEBYvuEwbwA87k9dPgg2c\njW7LPT2VJ1IRBsS3bEQUMdWphHs6rAj3fMK09sYYj/son3q3V8qmU2PuGIsfeBMk\no07iC81kYV/ZVxTkXOTpyzjLIQY7rmqrDB3B41qvm3EbQcxx6Sk9m2VCt7Yih2tx\n+bCnYknfrJb+8OkfH7aXl9PMTryku3iEHwIDAQABo1MwUTAdBgNVHQ4EFgQUCnWC\ni13w0c7yKIjym3AVTQGN5tgwHwYDVR0jBBgwFoAUCnWCi13w0c7yKIjym3AVTQGN\n5tgwDwYDVR0TAQH/BAUwAwEB/zANBgkqhkiG9w0BAQ0FAAOCAgEAly+O2ehrsuGp\n8YyyUa2oKbXhVd9a7IEkXZIF0E/8bmJJKBk8nD8AxU2SmhqX8ydM0xz/ObhOfm3j\nhyFIGRiouFrDdYy2bg9tbPxJ22wf+8+LyfqaPYn6RuvZV9PK89sKfMsA7UcW7O6K\noJWEOZPDFpEqr88IzpqYrPAJ1rU6rVMmFA+B9Xwmxoq5iknXJjkx2j/ccjFI2TwR\nvLGj2+6d9tmPrA4TISqiqRBTPqIwx8HQunnGM3DZ7dJw4/RDsGQ1w7+tW2B9tBw1\nT+a2Dv+hg21S/yolxz4ghYu0dSvHniasVghV8qYUMHjgICi/u65f+DKqU9mT4d8M\noTWpFBBlNYsO2APPyWiBSvkLktDkJVSSVUUxIzCNJsbbra2nngIRjdQoNaxkPxLw\n6VbHvQp1umJD0O/kemyCogb3jYZsUvnQmM6X9Y55/OfvkCE7ZpgHdM65hgrnuIFd\nt30cO/MPjEqqyEZH+Zw4inptmgVYEt+DcyNIbmaVnwz0l5l/5BfCW66xlnkSyMZ2\nOyb1senfVpQEDze2fTeEpc3pnopBeizTgDlg1xwOEa/P+7O5gD3xz/gxedY4gMfC\npifsKbyISK+Hi12yIDWfd/kx4moCt4MbmwY8wvSrQAGoI+qd+FnfOoQ2vFUiX135\n0OUv56166gDUfhnK4brg7OxpVccbgHU=\n-----END CERTIFICATE-----\n","owner":"root:root","path":"/etc/ssl/certs/tkg-custom-ca.pem","permissions":"0644"},{"content":"LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUdFRENDQS9pZ0F3SUJBZ0lVVS9GNHRWM25zS0dGREJWOVBuZGlKNjlldXNrd0RRWUpLb1pJaHZjTkFRRU4KQlFBd2FURUxNQWtHQTFVRUJoTUNRMDR4RURBT0JnTlZCQWdNQjBKbGFXcHBibWN4RURBT0JnTlZCQWNNQjBKbAphV3BwYm1jeEVEQU9CZ05WQkFvTUIyVjRZVzF3YkdVeEVUQVBCZ05WQkFzTUNGQmxjbk52Ym1Gc01SRXdEd1lEClZRUUREQWdxTG5Sclp5NXBiekFlRncweU1UQTVNRGd5TXpFNU1EZGFGdzB6TVRBNU1EWXlNekU1TURkYU1Ha3gKQ3pBSkJnTlZCQVlUQWtOT01SQXdEZ1lEVlFRSURBZENaV2xxYVc1bk1SQXdEZ1lEVlFRSERBZENaV2xxYVc1bgpNUkF3RGdZRFZRUUtEQWRsZUdGdGNHeGxNUkV3RHdZRFZRUUxEQWhRWlhKemIyNWhiREVSTUE4R0ExVUVBd3dJCktpNTBhMmN1YVc4d2dnSWlNQTBHQ1NxR1NJYjNEUUVCQVFVQUE0SUNEd0F3Z2dJS0FvSUNBUURNMjNVSlBmN0IKelh2c2hEcWZ1K281ZTdNbGRwWjE0OFB0MG1TSlpUSmw0KzVvR1dWZEQrL2dOVStvUW5ZVSswRUFjZGNmTUhGdApQVUp5c3h2YW9OUWczblJhelJEeVBDZ1FYNmtDRndtem0zZyt3Ym5rQ0o4VCtGb1F3VXcwTThydTBMMkptYlpkCjRRZ0t2NkJuWTFWWEFWeXR0Vko0MlR2Wk4rdGg5aFZEQ04vS2FTU3ZaSGg4UWU0ZFVJQklzY1RTT3JZd3BSWVAKRVpadGVQMmR5aWdzSnBJck9hZWlJVW4zVDJCckVCbFAxS3luOEFaQUtzT3ArY05seG16YmtvTlZDNjJhK0cxWQphSTFnYTladVFWKzh0TFpyM2JIWW01N3BVRUZyQUtjMDFkRitPaWI2RTJMb2tLUXdRdVBnK05td25zcTBReFoxCmVOaWZjZS94NUNzV2pHbUVFeDUvMng2S3Z0Rjd0NnBlclg4eEdzTVdPZ3FtT0NDMWxuak1jTzlHS1pHMGVLdDYKQ1FUekcvUjI1V2U2KzhwWW9Iam9mVEVqU3h2Rk1yY0NHbnpKcjZ2VlFIQ1FWbzIvUkVjZUNPbW9TL0s0STl5ZQpFSHJ3RGpJc3BLd2FvUlFyKzd1V3A4L01VaFFTdmh3RVUrb3VYWGU2bEJBVHUwQlg0Q2M5WnZhNGRKalFZdGJKCkdtd21nVEtJaDNUWWJTRy9ZWU1XZXFRb3l2MHl1S0NSRXJvUGxRY2dTbjZzVzlzcW1iRFlGQ3BybGVNZUJoWCsKdTY5cVpxb1pVNWZJREszdGFHMk1TbXlpcDJZMWp4ZjJWMTluM1Z5aklsZDVLelpzcGFxSmp6Mmk2MHFFT1ZvTQp2ZkFaWDhlWTRXV1JFcVpVM2xEWGl6bGNlUGdhSGxNZnN3SURBUUFCbzRHdk1JR3NNQjhHQTFVZEl3UVlNQmFBCkZBcDFnb3RkOE5ITzhpaUk4cHR3RlUwQmplYllNQWtHQTFVZEV3UUNNQUF3Q3dZRFZSMFBCQVFEQWdUd01CTUcKQTFVZEpRUU1NQW9HQ0NzR0FRVUZCd01CTUZ3R0ExVWRFUVJWTUZPQ0UyaGhjbUp2Y2kxcGJtWnlZUzUwYTJjdQphVytDRFdoaGNtSnZjaTUwYTJjdWFXK0NEbWR5WVdaaGJtRXVkR3RuTG1sdmdnOXJkV0psWVhCd2N5NTBhMmN1CmFXK0NERzFwYm1sdkxuUnJaeTVwYnpBTkJna3Foa2lHOXcwQkFRMEZBQU9DQWdFQU1Vbkg2b2RNUWpTWmMyaFcKNm5jcjdGbGxIZCtoQUpuZkhubnFrOG9idkJlRzlpbkxGNzRBTm9mcVUyUmZXbkNEajBvK3p5TGliVGVVTzg3cgpidXlPbmpiQlAxa3UyS3NHTkZ6Z2N1NkJVdERuSWFHM0NkOFhVRHR2bWRQbmx6d0ZwNi92eXBKTjVNS3l6SmRQCkM4QjNXUVBrcDdyUTF5NzBZRVd2ZTUxMlFpWUswR3ZzL0oxV1RKdDMyTkNNc1JYSGRpYzdyS1FsY3FQQjc5WTIKVXdtWHlqbmRZUnQraTlIUW9qVnMreG85Q0xlTnl4VjNxT3phSkkvREpyckNud1pLQ0w4cUtqRmswaDZJaGs5UQp6QlRaSVpmUVNjcVpYQURZYWZMSFUxWHhrRnZPTktWZ25DUFNnekNXYk9RK1hybi8vWnNlNkpXcmR2UEtxUE9zCkc4K3E3czZXK2N6N3g4TlVrWW9JK2I1eTgzNDBPV2N0ZmVndkpWLy9kK1p5NkRGK2dhRC8rWEhXWWJwWTd1WGoKWms5ZkxqMUxwTGQ1dmVqWTdRNklVYjllZGNWdG1tSUozTHJzajRmYzJxME9sL0F5YkFreFJjZFdKWUVtZTQzZwpBUGRoL1hXbVkvb05vOERxSTQwRHo3bURmUlZjZUlBandrVjhPM3F5cFZsWVl2b0xBYlFFS2RYWGl0dzBrb0NtCkNqTmNpVHJyNGZ2SExvYS9TLyt4VThVUzF4WmlOTnlEOHg4c21PQXlacWhRbEtNVURwQ1ZqeVdOZVljR3UzaVEKcTNGelpyTjRFSDlRenI5VURoQktIb2szSTZTUUtuMEc2T2FwcUFsYVJ6eHIrZmJIQWFrcTdRb1VhdGtiQVZvbgo4TmJDNUFhTVVQNTU3bjBvVXUrdnRKWnpFWFE9Ci0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0K","encoding":"base64","path":"/etc/containerd/harbor-infra.tkg.io.crt","permissions":"0444"}],"joinConfiguration":{"nodeRegistration":{"criSocket":"/var/run/containerd/containerd.sock","kubeletExtraArgs":{"cloud-provider":"external","tls-cipher-suites":"TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384"},"name":"{{ ds.meta_data.hostname }}"}},"preKubeadmCommands":["hostname \"{{ ds.meta_data.hostname }}\"","echo \"::1         ipv6-localhost ipv6-loopback\" \u003e/etc/hosts","echo \"127.0.0.1   localhost\" \u003e\u003e/etc/hosts","echo \"127.0.0.1   {{ ds.meta_data.hostname }}\" \u003e\u003e/etc/hosts","echo \"{{ ds.meta_data.hostname }}\" \u003e/etc/hostname","! which rehash_ca_certificates.sh 2\u003e/dev/null || rehash_ca_certificates.sh","! which update-ca-certificates 2\u003e/dev/null || (mv /etc/ssl/certs/tkg-custom-ca.pem /usr/local/share/ca-certificates/tkg-custom-ca.crt \u0026\u0026 update-ca-certificates)","echo '[DHCPv4]' \u003e\u003e /etc/systemd/network/10-id0.network","echo 'UseDNS=no' \u003e\u003e /etc/systemd/network/10-id0.network","/usr/bin/systemctl restart systemd-networkd 2\u003e/dev/null","echo '[plugins.\"io.containerd.grpc.v1.cri\".registry.configs.\"harbor-infra.tkg.io\".tls]' \u003e\u003e /etc/containerd/config.toml","echo '  ca_file = \"/etc/containerd/harbor-infra.tkg.io.crt\"' \u003e\u003e /etc/containerd/config.toml","systemctl restart containerd","sed -i 's|\".*/pause|\"harbor-infra.tkg.io/library/pause|' /etc/containerd/config.toml","systemctl restart containerd"],"useExperimentalRetryJoin":true,"users":[{"name":"capv","sshAuthorizedKeys":["ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCpLD3R/KUh6LLbFHEQmMwOqspMFv1FiZul6ekLXTn7O0bnH88kE8hP6bs+ytIIIn3lL6KL18zhnLomPdBPEm/DfLSLbeh0UtYa7ChMusN6BY4t0FxgQ57GuQh7AzaHo5M10cjVpVOImgWET8LaoUZePdvjxiroUW9XSt3rqZEVt7ir5GwPj19Ms0nzFBSRWk4Qf3chc7mBY6LZN6gD/4QZtBjuJtkrMT/SWsC0p9EgCi8HVpu+WpUgFR82Y+EmF2rrn/ZfnTOS13pTomJfzm6biF4fvIqrSEAbhL251o8I/7nZKNnJU4kaAzrnkvRErjZ6Pnyc78FW8HyuZ4V5SRx+fCmI8F478MBjFIBb8eXPUklEPPg58PEYlq7hgZggRpTEV4qHFvWCF6goku7gKbe2IJOXDHM86+oul9i8PJk1Y496IEjlmCB/J8petU6FASiWH/BD7xXAirVe1cydWabbrTt3exQZ559mCbo0mR1lvi5NDPZZ7KVLAcIwJeLVWDI00Sg3dVpT5TR58uWPGGB2GTbYQFKvMX9QW8Y/+IPbFhPDycGzpKroBmD2JRcYVf6rUPbZeyJsX4v0U21yuUKp4L1oNL6LUjVwuUw5S7EgwNrLcKJYAUCYb5y4fJ5sQXlP7nmyjcO0+LgXMHG42sBiOPtHytEPvZ7W76VSpkm3EQ=="],"sudo":"ALL=(ALL) NOPASSWD:ALL"}]}}}}
+    creationTimestamp: "2021-10-01T16:17:43Z"
+    generation: 1
+    managedFields:
+    - apiVersion: bootstrap.cluster.x-k8s.io/v1alpha3
+      fieldsType: FieldsV1
+      fieldsV1:
+        f:metadata:
+          f:annotations:
+            .: {}
+            f:kubectl.kubernetes.io/last-applied-configuration: {}
+        f:spec:
+          .: {}
+          f:template:
+            .: {}
+            f:spec:
+              .: {}
+              f:files: {}
+              f:joinConfiguration:
+                .: {}
+                f:nodeRegistration:
+                  .: {}
+                  f:criSocket: {}
+                  f:kubeletExtraArgs:
+                    .: {}
+                    f:cloud-provider: {}
+                    f:tls-cipher-suites: {}
+                  f:name: {}
+              f:preKubeadmCommands: {}
+              f:useExperimentalRetryJoin: {}
+              f:users: {}
+      manager: kubectl-client-side-apply
+      operation: Update
+      time: "2021-10-01T16:17:43Z"
+    - apiVersion: bootstrap.cluster.x-k8s.io/v1alpha3
+      fieldsType: FieldsV1
+      fieldsV1:
+        f:metadata:
+          f:ownerReferences:
+            .: {}
+            k:{"uid":"53506426-a4bb-43a4-9630-1e52206f963c"}:
+              .: {}
+              f:apiVersion: {}
+              f:kind: {}
+              f:name: {}
+              f:uid: {}
+      manager: manager
+      operation: Update
+      time: "2021-10-01T16:17:43Z"
+    name: tkc-prod-md-0
+    namespace: default
+    ownerReferences:
+    - apiVersion: cluster.x-k8s.io/v1alpha3
+      kind: Cluster
+      name: tkc-prod
+      uid: 53506426-a4bb-43a4-9630-1e52206f963c
+    resourceVersion: "10014"
+    uid: 10160a42-65fd-4dc0-9bbb-47d8318e2d3d
+  spec:
+    template:
+      spec:
+        files:
+        - content: |
+            -----BEGIN CERTIFICATE-----
+            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
+            0OUv56166gDUfhnK4brg7OxpVccbgHU=
+            -----END CERTIFICATE-----
+          owner: root:root
+          path: /etc/ssl/certs/tkg-custom-ca.pem
+          permissions: "0644"
+        - content: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUdFRENDQS9pZ0F3SUJBZ0lVVS9GNHRWM25zS0dGREJWOVBuZGlKNjlldXNrd0RRWUpLb1pJaHZjTkFRRU4KQlFBd2FURUxNQWtHQTFVRUJoTUNRMDR4RURBT0JnTlZCQWdNQjBKbGFXcHBibWN4RURBT0JnTlZCQWNNQjBKbAphV3BwYm1jeEVEQU9CZ05WQkFvTUIyVjRZVzF3YkdVeEVUQVBCZ05WQkFzTUNGQmxjbk52Ym1Gc01SRXdEd1lEClZRUUREQWdxTG5Sclp5NXBiekFlRncweU1UQTVNRGd5TXpFNU1EZGFGdzB6TVRBNU1EWXlNekU1TURkYU1Ha3gKQ3pBSkJnTlZCQVlUQWtOT01SQXdEZ1lEVlFRSURBZENaV2xxYVc1bk1SQXdEZ1lEVlFRSERBZENaV2xxYVc1bgpNUkF3RGdZRFZRUUtEQWRsZUdGdGNHeGxNUkV3RHdZRFZRUUxEQWhRWlhKemIyNWhiREVSTUE4R0ExVUVBd3dJCktpNTBhMmN1YVc4d2dnSWlNQTBHQ1NxR1NJYjNEUUVCQVFVQUE0SUNEd0F3Z2dJS0FvSUNBUURNMjNVSlBmN0IKelh2c2hEcWZ1K281ZTdNbGRwWjE0OFB0MG1TSlpUSmw0KzVvR1dWZEQrL2dOVStvUW5ZVSswRUFjZGNmTUhGdApQVUp5c3h2YW9OUWczblJhelJEeVBDZ1FYNmtDRndtem0zZyt3Ym5rQ0o4VCtGb1F3VXcwTThydTBMMkptYlpkCjRRZ0t2NkJuWTFWWEFWeXR0Vko0MlR2Wk4rdGg5aFZEQ04vS2FTU3ZaSGg4UWU0ZFVJQklzY1RTT3JZd3BSWVAKRVpadGVQMmR5aWdzSnBJck9hZWlJVW4zVDJCckVCbFAxS3luOEFaQUtzT3ArY05seG16YmtvTlZDNjJhK0cxWQphSTFnYTladVFWKzh0TFpyM2JIWW01N3BVRUZyQUtjMDFkRitPaWI2RTJMb2tLUXdRdVBnK05td25zcTBReFoxCmVOaWZjZS94NUNzV2pHbUVFeDUvMng2S3Z0Rjd0NnBlclg4eEdzTVdPZ3FtT0NDMWxuak1jTzlHS1pHMGVLdDYKQ1FUekcvUjI1V2U2KzhwWW9Iam9mVEVqU3h2Rk1yY0NHbnpKcjZ2VlFIQ1FWbzIvUkVjZUNPbW9TL0s0STl5ZQpFSHJ3RGpJc3BLd2FvUlFyKzd1V3A4L01VaFFTdmh3RVUrb3VYWGU2bEJBVHUwQlg0Q2M5WnZhNGRKalFZdGJKCkdtd21nVEtJaDNUWWJTRy9ZWU1XZXFRb3l2MHl1S0NSRXJvUGxRY2dTbjZzVzlzcW1iRFlGQ3BybGVNZUJoWCsKdTY5cVpxb1pVNWZJREszdGFHMk1TbXlpcDJZMWp4ZjJWMTluM1Z5aklsZDVLelpzcGFxSmp6Mmk2MHFFT1ZvTQp2ZkFaWDhlWTRXV1JFcVpVM2xEWGl6bGNlUGdhSGxNZnN3SURBUUFCbzRHdk1JR3NNQjhHQTFVZEl3UVlNQmFBCkZBcDFnb3RkOE5ITzhpaUk4cHR3RlUwQmplYllNQWtHQTFVZEV3UUNNQUF3Q3dZRFZSMFBCQVFEQWdUd01CTUcKQTFVZEpRUU1NQW9HQ0NzR0FRVUZCd01CTUZ3R0ExVWRFUVJWTUZPQ0UyaGhjbUp2Y2kxcGJtWnlZUzUwYTJjdQphVytDRFdoaGNtSnZjaTUwYTJjdWFXK0NEbWR5WVdaaGJtRXVkR3RuTG1sdmdnOXJkV0psWVhCd2N5NTBhMmN1CmFXK0NERzFwYm1sdkxuUnJaeTVwYnpBTkJna3Foa2lHOXcwQkFRMEZBQU9DQWdFQU1Vbkg2b2RNUWpTWmMyaFcKNm5jcjdGbGxIZCtoQUpuZkhubnFrOG9idkJlRzlpbkxGNzRBTm9mcVUyUmZXbkNEajBvK3p5TGliVGVVTzg3cgpidXlPbmpiQlAxa3UyS3NHTkZ6Z2N1NkJVdERuSWFHM0NkOFhVRHR2bWRQbmx6d0ZwNi92eXBKTjVNS3l6SmRQCkM4QjNXUVBrcDdyUTF5NzBZRVd2ZTUxMlFpWUswR3ZzL0oxV1RKdDMyTkNNc1JYSGRpYzdyS1FsY3FQQjc5WTIKVXdtWHlqbmRZUnQraTlIUW9qVnMreG85Q0xlTnl4VjNxT3phSkkvREpyckNud1pLQ0w4cUtqRmswaDZJaGs5UQp6QlRaSVpmUVNjcVpYQURZYWZMSFUxWHhrRnZPTktWZ25DUFNnekNXYk9RK1hybi8vWnNlNkpXcmR2UEtxUE9zCkc4K3E3czZXK2N6N3g4TlVrWW9JK2I1eTgzNDBPV2N0ZmVndkpWLy9kK1p5NkRGK2dhRC8rWEhXWWJwWTd1WGoKWms5ZkxqMUxwTGQ1dmVqWTdRNklVYjllZGNWdG1tSUozTHJzajRmYzJxME9sL0F5YkFreFJjZFdKWUVtZTQzZwpBUGRoL1hXbVkvb05vOERxSTQwRHo3bURmUlZjZUlBandrVjhPM3F5cFZsWVl2b0xBYlFFS2RYWGl0dzBrb0NtCkNqTmNpVHJyNGZ2SExvYS9TLyt4VThVUzF4WmlOTnlEOHg4c21PQXlacWhRbEtNVURwQ1ZqeVdOZVljR3UzaVEKcTNGelpyTjRFSDlRenI5VURoQktIb2szSTZTUUtuMEc2T2FwcUFsYVJ6eHIrZmJIQWFrcTdRb1VhdGtiQVZvbgo4TmJDNUFhTVVQNTU3bjBvVXUrdnRKWnpFWFE9Ci0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0K
+          encoding: base64
+          path: /etc/containerd/harbor-infra.tkg.io.crt
+          permissions: "0444"
+        joinConfiguration:
+          nodeRegistration:
+            criSocket: /var/run/containerd/containerd.sock
+            kubeletExtraArgs:
+              cloud-provider: external
+              tls-cipher-suites: TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384
+            name: '{{ ds.meta_data.hostname }}'
+        preKubeadmCommands:
+        - hostname "{{ ds.meta_data.hostname }}"
+        - echo "::1         ipv6-localhost ipv6-loopback" >/etc/hosts
+        - echo "127.0.0.1   localhost" >>/etc/hosts
+        - echo "127.0.0.1   {{ ds.meta_data.hostname }}" >>/etc/hosts
+        - echo "{{ ds.meta_data.hostname }}" >/etc/hostname
+        - '! which rehash_ca_certificates.sh 2>/dev/null || rehash_ca_certificates.sh'
+        - '! which update-ca-certificates 2>/dev/null || (mv /etc/ssl/certs/tkg-custom-ca.pem
+          /usr/local/share/ca-certificates/tkg-custom-ca.crt && update-ca-certificates)'
+        - echo '[DHCPv4]' >> /etc/systemd/network/10-id0.network
+        - echo 'UseDNS=no' >> /etc/systemd/network/10-id0.network
+        - /usr/bin/systemctl restart systemd-networkd 2>/dev/null
+        - echo '[plugins."io.containerd.grpc.v1.cri".registry.configs."harbor-infra.tkg.io".tls]'
+          >> /etc/containerd/config.toml
+        - echo '  ca_file = "/etc/containerd/harbor-infra.tkg.io.crt"' >> /etc/containerd/config.toml
+        - systemctl restart containerd
+        - sed -i 's|".*/pause|"harbor-infra.tkg.io/library/pause|' /etc/containerd/config.toml
+        - systemctl restart containerd
+        useExperimentalRetryJoin: true
+        users:
+        - name: capv
+          sshAuthorizedKeys:
+          - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCpLD3R/KUh6LLbFHEQmMwOqspMFv1FiZul6ekLXTn7O0bnH88kE8hP6bs+ytIIIn3lL6KL18zhnLomPdBPEm/DfLSLbeh0UtYa7ChMusN6BY4t0FxgQ57GuQh7AzaHo5M10cjVpVOImgWET8LaoUZePdvjxiroUW9XSt3rqZEVt7ir5GwPj19Ms0nzFBSRWk4Qf3chc7mBY6LZN6gD/4QZtBjuJtkrMT/SWsC0p9EgCi8HVpu+WpUgFR82Y+EmF2rrn/ZfnTOS13pTomJfzm6biF4fvIqrSEAbhL251o8I/7nZKNnJU4kaAzrnkvRErjZ6Pnyc78FW8HyuZ4V5SRx+fCmI8F478MBjFIBb8eXPUklEPPg58PEYlq7hgZggRpTEV4qHFvWCF6goku7gKbe2IJOXDHM86+oul9i8PJk1Y496IEjlmCB/J8petU6FASiWH/BD7xXAirVe1cydWabbrTt3exQZ559mCbo0mR1lvi5NDPZZ7KVLAcIwJeLVWDI00Sg3dVpT5TR58uWPGGB2GTbYQFKvMX9QW8Y/+IPbFhPDycGzpKroBmD2JRcYVf6rUPbZeyJsX4v0U21yuUKp4L1oNL6LUjVwuUw5S7EgwNrLcKJYAUCYb5y4fJ5sQXlP7nmyjcO0+LgXMHG42sBiOPtHytEPvZ7W76VSpkm3EQ==
+          sudo: ALL=(ALL) NOPASSWD:ALL
+kind: List
+metadata:
+  resourceVersion: ""
+  selfLink: ""

@@ -1,0 +1,1786 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: tanzu-system-registry
+  labels:
+    app: harbor
+  annotations:
+    kapp.k14s.io/delete-strategy: orphan
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  namespace: tanzu-system-registry
+  name: harbor
+  labels:
+    app: harbor
+rules:
+- apiGroups:
+  - policy
+  resources:
+  - podsecuritypolicies
+  verbs:
+  - use
+  resourceNames: []
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: RoleBinding
+metadata:
+  namespace: tanzu-system-registry
+  name: harbor
+  labels:
+    app: harbor
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: harbor
+subjects:
+- kind: ServiceAccount
+  name: default
+  namespace: tanzu-system-registry
+---
+apiVersion: cert-manager.io/v1alpha2
+kind: Issuer
+metadata:
+  name: harbor-self-signed-ca-issuer
+  namespace: tanzu-system-registry
+spec:
+  selfSigned: {}
+---
+apiVersion: cert-manager.io/v1alpha2
+kind: Certificate
+metadata:
+  name: harbor-ca
+  namespace: tanzu-system-registry
+spec:
+  secretName: harbor-ca-key-pair
+  duration: 87600h
+  renewBefore: 360h
+  organization:
+  - Project Harbor
+  commonName: Harbor CA
+  isCA: true
+  keySize: 2048
+  keyAlgorithm: rsa
+  keyEncoding: pkcs1
+  usages:
+  - server auth
+  - client auth
+  dnsNames:
+  - harborca
+  ipAddresses: []
+  issuerRef:
+    name: harbor-self-signed-ca-issuer
+    kind: Issuer
+    group: cert-manager.io
+---
+apiVersion: cert-manager.io/v1alpha2
+kind: Issuer
+metadata:
+  name: harbor-ca-issuer
+  namespace: tanzu-system-registry
+spec:
+  ca:
+    secretName: harbor-ca-key-pair
+---
+apiVersion: cert-manager.io/v1alpha2
+kind: Certificate
+metadata:
+  name: harbor-clair-internal-cert
+  namespace: tanzu-system-registry
+spec:
+  secretName: harbor-clair-internal-tls
+  duration: 87600h
+  renewBefore: 360h
+  organization:
+  - Project Harbor
+  commonName: harbor-clair
+  isCA: false
+  keySize: 2048
+  keyAlgorithm: rsa
+  keyEncoding: pkcs1
+  usages:
+  - server auth
+  - client auth
+  dnsNames:
+  - harbor-clair
+  - harbor-clair.tanzu-system-registry
+  - harbor-clair.tanzu-system-registry.svc
+  - harbor-clair.tanzu-system-registry.svc.cluster.local
+  ipAddresses: []
+  issuerRef:
+    name: harbor-ca-issuer
+    kind: Issuer
+    group: cert-manager.io
+---
+apiVersion: cert-manager.io/v1alpha2
+kind: Certificate
+metadata:
+  name: harbor-core-internal-cert
+  namespace: tanzu-system-registry
+spec:
+  secretName: harbor-core-internal-tls
+  duration: 87600h
+  renewBefore: 360h
+  organization:
+  - Project Harbor
+  commonName: harbor-core
+  isCA: false
+  keySize: 2048
+  keyAlgorithm: rsa
+  keyEncoding: pkcs1
+  usages:
+  - server auth
+  - client auth
+  dnsNames:
+  - harbor-core
+  - harbor-core.tanzu-system-registry
+  - harbor-core.tanzu-system-registry.svc
+  - harbor-core.tanzu-system-registry.svc.cluster.local
+  ipAddresses: []
+  issuerRef:
+    name: harbor-ca-issuer
+    kind: Issuer
+    group: cert-manager.io
+---
+apiVersion: cert-manager.io/v1alpha2
+kind: Certificate
+metadata:
+  name: harbor-jobservice-internal-cert
+  namespace: tanzu-system-registry
+spec:
+  secretName: harbor-jobservice-internal-tls
+  duration: 87600h
+  renewBefore: 360h
+  organization:
+  - Project Harbor
+  commonName: harbor-jobservice
+  isCA: false
+  keySize: 2048
+  keyAlgorithm: rsa
+  keyEncoding: pkcs1
+  usages:
+  - server auth
+  - client auth
+  dnsNames:
+  - harbor-jobservice
+  - harbor-jobservice.tanzu-system-registry
+  - harbor-jobservice.tanzu-system-registry.svc
+  - harbor-jobservice.tanzu-system-registry.svc.cluster.local
+  ipAddresses: []
+  issuerRef:
+    name: harbor-ca-issuer
+    kind: Issuer
+    group: cert-manager.io
+---
+apiVersion: cert-manager.io/v1alpha2
+kind: Certificate
+metadata:
+  name: harbor-portal-internal-cert
+  namespace: tanzu-system-registry
+spec:
+  secretName: harbor-portal-internal-tls
+  duration: 87600h
+  renewBefore: 360h
+  organization:
+  - Project Harbor
+  commonName: harbor-portal
+  isCA: false
+  keySize: 2048
+  keyAlgorithm: rsa
+  keyEncoding: pkcs1
+  usages:
+  - server auth
+  - client auth
+  dnsNames:
+  - harbor-portal
+  - harbor-portal.tanzu-system-registry
+  - harbor-portal.tanzu-system-registry.svc
+  - harbor-portal.tanzu-system-registry.svc.cluster.local
+  ipAddresses: []
+  issuerRef:
+    name: harbor-ca-issuer
+    kind: Issuer
+    group: cert-manager.io
+---
+apiVersion: cert-manager.io/v1alpha2
+kind: Certificate
+metadata:
+  name: harbor-registry-internal-cert
+  namespace: tanzu-system-registry
+spec:
+  secretName: harbor-registry-internal-tls
+  duration: 87600h
+  renewBefore: 360h
+  organization:
+  - Project Harbor
+  commonName: harbor-registry
+  isCA: false
+  keySize: 2048
+  keyAlgorithm: rsa
+  keyEncoding: pkcs1
+  usages:
+  - server auth
+  - client auth
+  dnsNames:
+  - harbor-registry
+  - harbor-registry.tanzu-system-registry
+  - harbor-registry.tanzu-system-registry.svc
+  - harbor-registry.tanzu-system-registry.svc.cluster.local
+  ipAddresses: []
+  issuerRef:
+    name: harbor-ca-issuer
+    kind: Issuer
+    group: cert-manager.io
+---
+apiVersion: cert-manager.io/v1alpha2
+kind: Certificate
+metadata:
+  name: harbor-trivy-internal-cert
+  namespace: tanzu-system-registry
+spec:
+  secretName: harbor-trivy-internal-tls
+  duration: 87600h
+  renewBefore: 360h
+  organization:
+  - Project Harbor
+  commonName: harbor-trivy
+  isCA: false
+  keySize: 2048
+  keyAlgorithm: rsa
+  keyEncoding: pkcs1
+  usages:
+  - server auth
+  - client auth
+  dnsNames:
+  - harbor-trivy
+  - harbor-trivy.tanzu-system-registry
+  - harbor-trivy.tanzu-system-registry.svc
+  - harbor-trivy.tanzu-system-registry.svc.cluster.local
+  ipAddresses: []
+  issuerRef:
+    name: harbor-ca-issuer
+    kind: Issuer
+    group: cert-manager.io
+---
+apiVersion: cert-manager.io/v1alpha2
+kind: Certificate
+metadata:
+  name: harbor-token-service-cert
+  namespace: tanzu-system-registry
+spec:
+  secretName: harbor-token-service
+  duration: 87600h
+  renewBefore: 360h
+  organization:
+  - Project Harbor
+  commonName: harbor-token-service
+  isCA: false
+  keySize: 2048
+  keyAlgorithm: rsa
+  keyEncoding: pkcs1
+  usages:
+  - server auth
+  - client auth
+  dnsNames:
+  - harbor-token-service
+  - harbor-token-service.tanzu-system-registry
+  - harbor-token-service.tanzu-system-registry.svc
+  - harbor-token-service.tanzu-system-registry.svc.cluster.local
+  ipAddresses: []
+  issuerRef:
+    name: harbor-ca-issuer
+    kind: Issuer
+    group: cert-manager.io
+---
+apiVersion: cert-manager.io/v1alpha2
+kind: Certificate
+metadata:
+  name: harbor-notary-signer-cert
+  namespace: tanzu-system-registry
+spec:
+  secretName: harbor-notary-signer
+  duration: 87600h
+  renewBefore: 360h
+  organization:
+  - Project Harbor
+  commonName: harbor-notary-signer
+  isCA: false
+  keySize: 2048
+  keyAlgorithm: rsa
+  keyEncoding: pkcs1
+  usages:
+  - server auth
+  - client auth
+  dnsNames:
+  - harbor-notary-signer
+  - harbor-notary-signer.tanzu-system-registry
+  - harbor-notary-signer.tanzu-system-registry.svc
+  - harbor-notary-signer.tanzu-system-registry.svc.cluster.local
+  ipAddresses: []
+  issuerRef:
+    name: harbor-ca-issuer
+    kind: Issuer
+    group: cert-manager.io
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: harbor-tls
+  namespace: tanzu-system-registry
+type: kubernetes.io/tls
+data:
+  ca.crt: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUZzekNDQTV1Z0F3SUJBZ0lVYzFkdUcweEwxbU1YaWEzWG5COVFnNE5ZOW5zd0RRWUpLb1pJaHZjTkFRRU4KQlFBd2FURUxNQWtHQTFVRUJoTUNRMDR4RURBT0JnTlZCQWdNQjBKbGFXcHBibWN4RURBT0JnTlZCQWNNQjBKbAphV3BwYm1jeEVEQU9CZ05WQkFvTUIyVjRZVzF3YkdVeEVUQVBCZ05WQkFzTUNGQmxjbk52Ym1Gc01SRXdEd1lEClZRUUREQWdxTG5Sclp5NXBiekFlRncweU1UQTVNRGd5TXpFNU1EWmFGdzB6TVRBNU1EWXlNekU1TURaYU1Ha3gKQ3pBSkJnTlZCQVlUQWtOT01SQXdEZ1lEVlFRSURBZENaV2xxYVc1bk1SQXdEZ1lEVlFRSERBZENaV2xxYVc1bgpNUkF3RGdZRFZRUUtEQWRsZUdGdGNHeGxNUkV3RHdZRFZRUUxEQWhRWlhKemIyNWhiREVSTUE4R0ExVUVBd3dJCktpNTBhMmN1YVc4d2dnSWlNQTBHQ1NxR1NJYjNEUUVCQVFVQUE0SUNEd0F3Z2dJS0FvSUNBUURHbURLMndDS3AKU0lraE5RNnhHekFnYlZseHcyU0F1WGQ0QkRIOG5IWjhxcTlrZ3B6c1l6Rk94Vzh0WmxmeFh0NVBROHlLQkJycQowTXFOQ2cxVklnKzVRRk0rcXVYSkJCUVVUS2tJaG5HemFsZXFsNGNCd3JqbFI0QkljQVdkbHpPVm5zSDZVV3UwCmJ2Q0hNb3BWOFFaN0MrMGoyN0daVnNhaFZoZngvRzZpMi9Ub1NZZENJcDhab0pUeHlEWTEyeHZsZytPWDcvLzgKeXVyVUNPUFl1ay92SlNWaGtVcUVmbTlVRE1qYW45VlBVMnVDTVpldmgrRmUxMXF1WVZIWHpJc0VpNlF5VkNHNgowcm82Sm10NTlyOGM3cDVVd0JpdEp2b09mTFRoY3RwejNraFNHOUV0YWdWWGo4QzV6N0l0N1RtR3h3dmd4NjZXCjJ6cmNJeGt1aWRNRWtxL2JUZXBnbXkzWFBXYU91YWM0d2lZRDRsbGtDOFpUc2R6Qm9zNFEyL1UwdjIvQXVnakkKVk1PdlYwSjFEOGRpZ3BPcCtSUkE4WGNKSDUwcHdhdHNuMWR6NW1yWUFSeExMWWRxVUJYQ3VOdVFkZ1E2S3pkNApsYy9vU091VmNsQUxyblI0OGlEaHZIV3lmZXlRZXR2eHBRaFh2MWJQNUVpRUVCWXZ1RXdid0E4N2s5ZFBnZzJjCmpXN0xQVDJWSjFJUkJzUzNiRVFVTWRXcGhIczZyQWozZk1LMDlzWVlqL3NvbjNxM1Y4cW1VMlB1R0lzZmVCTWsKbzA3aUM4MWtZVi9aVnhUa1hPVHB5empMSVFZN3JtcXJEQjNCNDFxdm0zRWJRY3h4NlNrOW0yVkN0N1lpaDJ0eAorYkNuWWtuZnJKYis4T2tmSDdhWGw5UE1UcnlrdTNpRUh3SURBUUFCbzFNd1VUQWRCZ05WSFE0RUZnUVVDbldDCmkxM3cwYzd5S0lqeW0zQVZUUUdONXRnd0h3WURWUjBqQkJnd0ZvQVVDbldDaTEzdzBjN3lLSWp5bTNBVlRRR04KNXRnd0R3WURWUjBUQVFIL0JBVXdBd0VCL3pBTkJna3Foa2lHOXcwQkFRMEZBQU9DQWdFQWx5K08yZWhyc3VHcAo4WXl5VWEyb0tiWGhWZDlhN0lFa1haSUYwRS84Ym1KSktCazhuRDhBeFUyU21ocVg4eWRNMHh6L09iaE9mbTNqCmh5RklHUmlvdUZyRGRZeTJiZzl0YlB4SjIyd2YrOCtMeWZxYVBZbjZSdXZaVjlQSzg5c0tmTXNBN1VjVzdPNksKb0pXRU9aUERGcEVxcjg4SXpwcVlyUEFKMXJVNnJWTW1GQStCOVh3bXhvcTVpa25YSmpreDJqL2NjakZJMlR3Ugp2TEdqMis2ZDl0bVByQTRUSVNxaXFSQlRQcUl3eDhIUXVubkdNM0RaN2RKdzQvUkRzR1ExdzcrdFcyQjl0QncxClQrYTJEditoZzIxUy95b2x4ejRnaFl1MGRTdkhuaWFzVmdoVjhxWVVNSGpnSUNpL3U2NWYrREtxVTltVDRkOE0Kb1RXcEZCQmxOWXNPMkFQUHlXaUJTdmtMa3REa0pWU1NWVVV4SXpDTkpzYmJyYTJubmdJUmpkUW9OYXhrUHhMdwo2VmJIdlFwMXVtSkQwTy9rZW15Q29nYjNqWVpzVXZuUW1NNlg5WTU1L09mdmtDRTdacGdIZE02NWhncm51SUZkCnQzMGNPL01QakVxcXlFWkgrWnc0aW5wdG1nVllFdCtEY3lOSWJtYVZud3owbDVsLzVCZkNXNjZ4bG5rU3lNWjIKT3liMXNlbmZWcFFFRHplMmZUZUVwYzNwbm9wQmVpelRnRGxnMXh3T0VhL1ArN081Z0QzeHovZ3hlZFk0Z01mQwpwaWZzS2J5SVNLK0hpMTJ5SURXZmQva3g0bW9DdDRNYm13WTh3dlNyUUFHb0krcWQrRm5mT29RMnZGVWlYMTM1CjBPVXY1NjE2NmdEVWZobks0YnJnN094cFZjY2JnSFU9Ci0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0=
+  tls.crt: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUdFRENDQS9pZ0F3SUJBZ0lVVS9GNHRWM25zS0dGREJWOVBuZGlKNjlldXNrd0RRWUpLb1pJaHZjTkFRRU4KQlFBd2FURUxNQWtHQTFVRUJoTUNRMDR4RURBT0JnTlZCQWdNQjBKbGFXcHBibWN4RURBT0JnTlZCQWNNQjBKbAphV3BwYm1jeEVEQU9CZ05WQkFvTUIyVjRZVzF3YkdVeEVUQVBCZ05WQkFzTUNGQmxjbk52Ym1Gc01SRXdEd1lEClZRUUREQWdxTG5Sclp5NXBiekFlRncweU1UQTVNRGd5TXpFNU1EZGFGdzB6TVRBNU1EWXlNekU1TURkYU1Ha3gKQ3pBSkJnTlZCQVlUQWtOT01SQXdEZ1lEVlFRSURBZENaV2xxYVc1bk1SQXdEZ1lEVlFRSERBZENaV2xxYVc1bgpNUkF3RGdZRFZRUUtEQWRsZUdGdGNHeGxNUkV3RHdZRFZRUUxEQWhRWlhKemIyNWhiREVSTUE4R0ExVUVBd3dJCktpNTBhMmN1YVc4d2dnSWlNQTBHQ1NxR1NJYjNEUUVCQVFVQUE0SUNEd0F3Z2dJS0FvSUNBUURNMjNVSlBmN0IKelh2c2hEcWZ1K281ZTdNbGRwWjE0OFB0MG1TSlpUSmw0KzVvR1dWZEQrL2dOVStvUW5ZVSswRUFjZGNmTUhGdApQVUp5c3h2YW9OUWczblJhelJEeVBDZ1FYNmtDRndtem0zZyt3Ym5rQ0o4VCtGb1F3VXcwTThydTBMMkptYlpkCjRRZ0t2NkJuWTFWWEFWeXR0Vko0MlR2Wk4rdGg5aFZEQ04vS2FTU3ZaSGg4UWU0ZFVJQklzY1RTT3JZd3BSWVAKRVpadGVQMmR5aWdzSnBJck9hZWlJVW4zVDJCckVCbFAxS3luOEFaQUtzT3ArY05seG16YmtvTlZDNjJhK0cxWQphSTFnYTladVFWKzh0TFpyM2JIWW01N3BVRUZyQUtjMDFkRitPaWI2RTJMb2tLUXdRdVBnK05td25zcTBReFoxCmVOaWZjZS94NUNzV2pHbUVFeDUvMng2S3Z0Rjd0NnBlclg4eEdzTVdPZ3FtT0NDMWxuak1jTzlHS1pHMGVLdDYKQ1FUekcvUjI1V2U2KzhwWW9Iam9mVEVqU3h2Rk1yY0NHbnpKcjZ2VlFIQ1FWbzIvUkVjZUNPbW9TL0s0STl5ZQpFSHJ3RGpJc3BLd2FvUlFyKzd1V3A4L01VaFFTdmh3RVUrb3VYWGU2bEJBVHUwQlg0Q2M5WnZhNGRKalFZdGJKCkdtd21nVEtJaDNUWWJTRy9ZWU1XZXFRb3l2MHl1S0NSRXJvUGxRY2dTbjZzVzlzcW1iRFlGQ3BybGVNZUJoWCsKdTY5cVpxb1pVNWZJREszdGFHMk1TbXlpcDJZMWp4ZjJWMTluM1Z5aklsZDVLelpzcGFxSmp6Mmk2MHFFT1ZvTQp2ZkFaWDhlWTRXV1JFcVpVM2xEWGl6bGNlUGdhSGxNZnN3SURBUUFCbzRHdk1JR3NNQjhHQTFVZEl3UVlNQmFBCkZBcDFnb3RkOE5ITzhpaUk4cHR3RlUwQmplYllNQWtHQTFVZEV3UUNNQUF3Q3dZRFZSMFBCQVFEQWdUd01CTUcKQTFVZEpRUU1NQW9HQ0NzR0FRVUZCd01CTUZ3R0ExVWRFUVJWTUZPQ0UyaGhjbUp2Y2kxcGJtWnlZUzUwYTJjdQphVytDRFdoaGNtSnZjaTUwYTJjdWFXK0NEbWR5WVdaaGJtRXVkR3RuTG1sdmdnOXJkV0psWVhCd2N5NTBhMmN1CmFXK0NERzFwYm1sdkxuUnJaeTVwYnpBTkJna3Foa2lHOXcwQkFRMEZBQU9DQWdFQU1Vbkg2b2RNUWpTWmMyaFcKNm5jcjdGbGxIZCtoQUpuZkhubnFrOG9idkJlRzlpbkxGNzRBTm9mcVUyUmZXbkNEajBvK3p5TGliVGVVTzg3cgpidXlPbmpiQlAxa3UyS3NHTkZ6Z2N1NkJVdERuSWFHM0NkOFhVRHR2bWRQbmx6d0ZwNi92eXBKTjVNS3l6SmRQCkM4QjNXUVBrcDdyUTF5NzBZRVd2ZTUxMlFpWUswR3ZzL0oxV1RKdDMyTkNNc1JYSGRpYzdyS1FsY3FQQjc5WTIKVXdtWHlqbmRZUnQraTlIUW9qVnMreG85Q0xlTnl4VjNxT3phSkkvREpyckNud1pLQ0w4cUtqRmswaDZJaGs5UQp6QlRaSVpmUVNjcVpYQURZYWZMSFUxWHhrRnZPTktWZ25DUFNnekNXYk9RK1hybi8vWnNlNkpXcmR2UEtxUE9zCkc4K3E3czZXK2N6N3g4TlVrWW9JK2I1eTgzNDBPV2N0ZmVndkpWLy9kK1p5NkRGK2dhRC8rWEhXWWJwWTd1WGoKWms5ZkxqMUxwTGQ1dmVqWTdRNklVYjllZGNWdG1tSUozTHJzajRmYzJxME9sL0F5YkFreFJjZFdKWUVtZTQzZwpBUGRoL1hXbVkvb05vOERxSTQwRHo3bURmUlZjZUlBandrVjhPM3F5cFZsWVl2b0xBYlFFS2RYWGl0dzBrb0NtCkNqTmNpVHJyNGZ2SExvYS9TLyt4VThVUzF4WmlOTnlEOHg4c21PQXlacWhRbEtNVURwQ1ZqeVdOZVljR3UzaVEKcTNGelpyTjRFSDlRenI5VURoQktIb2szSTZTUUtuMEc2T2FwcUFsYVJ6eHIrZmJIQWFrcTdRb1VhdGtiQVZvbgo4TmJDNUFhTVVQNTU3bjBvVXUrdnRKWnpFWFE9Ci0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0=
+  tls.key: LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNSUlKS0FJQkFBS0NBZ0VBek50MUNUMyt3YzE3N0lRNm43dnFPWHV6SlhhV2RlUEQ3ZEpraVdVeVplUHVhQmxsClhRL3Y0RFZQcUVKMkZQdEJBSEhYSHpCeGJUMUNjck1iMnFEVUlONTBXczBROGp3b0VGK3BBaGNKczV0NFBzRzUKNUFpZkUvaGFFTUZNTkRQSzd0QzlpWm0yWGVFSUNyK2daMk5WVndGY3JiVlNlTms3MlRmcllmWVZRd2pmeW1rawpyMlI0ZkVIdUhWQ0FTTEhFMGpxMk1LVVdEeEdXYlhqOW5jb29MQ2FTS3ptbm9pRko5MDlnYXhBWlQ5U3NwL0FHClFDckRxZm5EWmNaczI1S0RWUXV0bXZodFdHaU5ZR3ZXYmtGZnZMUzJhOTJ4Mkp1ZTZWQkJhd0NuTk5YUmZqb20KK2hOaTZKQ2tNRUxqNFBqWnNKN0t0RU1XZFhqWW4zSHY4ZVFyRm94cGhCTWVmOXNlaXI3UmU3ZXFYcTEvTVJyRApGam9LcGpnZ3RaWjR6SER2UmltUnRIaXJlZ2tFOHh2MGR1Vm51dnZLV0tCNDZIMHhJMHNieFRLM0FocDh5YStyCjFVQndrRmFOdjBSSEhnanBxRXZ5dUNQY25oQjY4QTR5TEtTc0dxRVVLL3U3bHFmUHpGSVVFcjRjQkZQcUxsMTMKdXBRUUU3dEFWK0FuUFdiMnVIU1kwR0xXeVJwc0pvRXlpSWQwMkcwaHYyR0RGbnFrS01yOU1yaWdrUks2RDVVSApJRXArckZ2YktwbXcyQlFxYTVYakhnWVYvcnV2YW1hcUdWT1h5QXl0N1dodGpFcHNvcWRtTlk4WDlsZGZaOTFjCm95SlhlU3MyYktXcWlZODlvdXRLaERsYURMM3dHVi9IbU9GbGtSS21WTjVRMTRzNVhIajRHaDVUSDdNQ0F3RUEKQVFLQ0FnQkdBWWtSUzNwUHlHVGRBcUwyQzBXVHQwNFZNMTFmbENKVWwxMThCblVlbExIWUtUV1dnK2U1ZXY1cAp4YXlNcHdBam9zT2RDUFQ2RzhFbGFVZlBncjU3TFFvZUxZM28rZDNIR3FtcTZTeUxrRW1iU0tDNTZLaFVMcjY0Cmt4WHprTzk4aFNFQWNPTDlXZlZobHZLOTRoZzd6MTlZaldwTm1nNzF3RUpVQzhCZ1ZCd0dFOEJSbjhmOHpwc00Kc1lIbFZicXBEUjlOcUZ6TmNYa3lsL0l6aGU0TWlISFRDN1RabHY2cjRSaFYvZjVvWllsTEtwODRObVQvSlRjOQpCSDRXMnc2K2RXc3lWa3NudHpMNURHRU85SkErOEpLV2NnQmd3VzJnMWFoRlpNZS9Lb0tZM0U2Tmp5cHh4MXdVCmtnZEZ6a1MyTXMyYXBJSjhTbnZjb1JjYVZwclNVRjhFQzZjS1lad0kybFNPbkxaZnk5VkpSSmxYaEZzZEtSMEEKUlBIMnV3M1BORitKTmpjTTk5WUt3QjVpQTdTYUR6ejRJa25iNzNjT2lqakl1aDBCSGw0QVBnTTlqYll6OTdPdApGM3diM2lCdXZwbjBZb1FHT2d3M1JINGRzYkw0K2UzK2twWmo1QUFjcGJNSXpnOHc4S2xPU2NMaW9MeGdvM1EwCk5ZVm8xUXh3eVpWTTFCWkF3NEl4bWhVQTdTZlpSME1TaGx2elRRZS9SaDlpbEVzODJObGpnMHRJbmpxYWQ2dzgKVEpJL1l0aE5pS1Nlb0E4MXRRSURZQjhNRVQ3QXZlV0xlejZYWjdkK1NFM0dIMUh2TVlHWU9uOHBTVlg0MTlCdgo2bGp1REhjcE82QURhSmdObEJUb1BKbm1QRU9rWkhuTVBmQ21RcHlkU2NHRGJiSmtBUUtDQVFFQS8xbEEvNTRrCmoxUEE3RFRqd2Y5ek1kZXQza0Nka2JyYWZTVXJRY3FXZG0xdXRlTDB0SXg1OXM4elREZm96UUJiRW54QXZBRE4KWnpyaVR0SzhvZDEySFFvYXRXaUdZSVQ5RmRaTXZEbU8rQk9QMFoveEhEQ3RyMTJiQ0NndmdsbTBDNFNNLzBueQppK3RMdnIvM3U2TFF0UHR2RCsyTFZzK3dRQXZUTTBHVlVMdjRPd0taT21HMlN3YS9yZnpTeWpzL010alNQUmRBCmxFWmZPL09pQzV1ckdUK3NDRXlkVi80VCtMdi9oM0VKTkVlTXRCRTN2MjZ6VmJFUWt3aER6bEN2czBoRC9XVDkKRzBDM0UvZkxORmtwSER5bTN0QjF0T20xSk9FLzcySHRVT1piTERRTHl1dGNKVlZxdG8xcTdzWUxJZVNyZE9VMgppaVhJRDZEenpJWHZnUUtDQVFFQXpXRTdVWTZrL2tQVlVWYVU3VzBrbkdFV1pUZnhRUDZmQXVFWTAwNWhXNFlvCjBCb2lES0pIWFhyOVBOenlxUzFKZHFUdGJMNjR1TDdRdU9YclVPajJ6Z3M2d0Q4K1oxcFhiUkpKOElQWnFNVEIKd04xM0dnd2hhbld5MW9SLy9td1E3NDM0STJOd1V1V0w1TnIxUnJEK2xhQVNLYUplQklWMW9wQURRdGtsdisvSwpjWktxMGVwTHprK0luRnZha1JnT1lQWkpFdUdZL0lIRWRsRWMzVk8xOXdkNzlTd2gvNVo5Qk9jUkx1TmJtSVJiCnBkcHBpWkgzdVUyVllPNjhzS0xXWFVIa0hlQS9YMGkvakNrcDl2cHcxUk1CYW8wTWRMVUZxV2o1dnRMMlFVeVAKMGFNSVJHdHJNQm1hcWNCalgyQVpRY0JyUnlvRDBhRWpPS2pqVEtqcE13S0NBUUVBa0pJSEEvS1VmbldMNS9BMQo5MU5hOUNCSnQyamNEWE0rV3RaZGZGMW4vTnNPY0hwejAza3BZSHlGYmFURjhMTS8zT0p1Z0VMd0NIOUZQQjJDCllSNlN6ZlEzbFBmK0JNMm13T05aQk1TTjFwUzB1NW1UbUVOVFF0TjdnQTNJZ0VPcmRVM3h5bVFpcCtkck5pOVgKNG10WFFQQ09PL1ZoQzZDQkNISHBmTDZuL0ZMQVF5REFnbFpxTUdZOHhoUTdmL1kxWE9OM2ZORWFaaGpGdUpyQwo1MUdXZUxBZEJZSGpIN3Voc1JVM29vWjBFSjVsNGxsUk45aEVQc01HUUVqUW94SDV1RWEwLzlWYW5FQnlweUtICmNUYjkySmZhWHBLbDRlemorMkp3b1diUFJ4dDFDVHphWkdRSEFyZ3V0L2F2VVVyZGFLNGdDUW54YkJ2aC9qOUIKYVUxM2dRS0NBUUFaT2lKQktGWlg3UmtjdnBmWWVobVBJOVhPWlFxN1F3dGhIU2toZTNVMStzcTBsU0V0a0JsWQpBQzF1OW16UUh3SHhFdDBmQ0daRU94d0VPaW1uYkpZMFJPallpR3d2NGNidlhObThNMVhmQnh3TmhxYUVpb3pvCk9NRFkzTG1rRkw0WHpzWjJBbGJmdDlaeEsvd0l6T0RZbkNyZTlsUzZGWEtYbnp6blR5ajE1SXhuV3U2a2pqVDEKaUl0dE9WTWxrMkRneEIvQnMvaEl1OS9YOEtxcy9RVlM3SlpyVFJwMy9KSXFzZjlJVlNFQklQRG85R1VXUXRtOAo1eXk4RlZjVUUweGxkQnlERnZKeHo4dkhlWjd2K1Y4MnJQajFqNUhDSENJdjV2Y1dXMjlvSWZGZ2ZMZ2RQMXlSCk1mUHZlZlE2Mk9FQlZKTlkwRzVicDRGZUNsQ3hMK1pGQW9JQkFEbm8wZGhVRFIxdkpOcElyeDFjK24rZGV2N0sKSWVLY0hvNlVoL2ZqT1NDTXR3YXBOOVdiOWplbnZtRVpuMmtKWjloOUIwUGRVTEZOcytxQ3NEWHBhT215QllBegpKZDRCRWZXQmVvTHhLVVJyZG5ZYzl1WW1RNUQrd0FQUjhQYTEzODlqZ1BQWHh3ZHltWmxHc2R6aTFzYXg5WVJBCktXbGZhUjNESjc4bnBqNk5NREQ2TFNCVjJZSXhKRjJCVGUzWDRSWDVZbjFFekNQTktZOHdrRkpZMk4xZzJOTnkKc1lkbG1VWTR0bmd0R2lhSGMwdTREWFJkcTFvL1JzVTg3WW42R1VJSkh2SmozRjR3eWFPckRNdmN1THZTTUx6TQplc2JkVnY3UTdTQXJOcVg1MHQxUDg4SzlTMlo2c2ovaUZUcFg4SUFDR1BYVWtPUnEvMEJsNGFXS0lkTT0KLS0tLS1FTkQgUlNBIFBSSVZBVEUgS0VZLS0tLS0=
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: harbor-clair
+  labels:
+    app: harbor
+    component: clair
+  namespace: tanzu-system-registry
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: harbor
+      component: clair
+  template:
+    metadata:
+      labels:
+        app: harbor
+        component: clair
+    spec:
+      securityContext:
+        fsGroup: 10000
+      containers:
+      - name: clair
+        image: harbor-infra.tkg.io/library/harbor/clair-photon:v2.1.3_vmware.1
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 6061
+          initialDelaySeconds: 300
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 6061
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        args:
+        - -log-level
+        - info
+        env:
+        - name: HTTP_PROXY
+          value: ""
+        - name: HTTPS_PROXY
+          value: ""
+        - name: NO_PROXY
+          value: harbor-core,harbor-jobservice,harbor-database,harbor-chartmuseum,harbor-clair,harbor-notary-server,harbor-notary-signer,harbor-registry,harbor-portal,harbor-trivy,127.0.0.1,localhost,.local,.internal
+        ports:
+        - containerPort: 6060
+        volumeMounts:
+        - name: config
+          mountPath: /etc/clair/config.yaml
+          subPath: config.yaml
+        - name: clair-internal-certs
+          mountPath: /etc/harbor/ssl/clair
+      - name: adapter
+        image: harbor-infra.tkg.io/library/harbor/clair-adapter-photon:v2.1.3_vmware.1
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          httpGet:
+            path: /probe/healthy
+            scheme: HTTPS
+            port: 8443
+          initialDelaySeconds: 300
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /probe/ready
+            scheme: HTTPS
+            port: 8443
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        env:
+        - name: SCANNER_CLAIR_URL
+          value: http://127.0.0.1:6060
+        - name: SCANNER_STORE_REDIS_URL
+          valueFrom:
+            secretKeyRef:
+              name: harbor-clair
+              key: redis
+        - name: SCANNER_CLAIR_DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: harbor-clair
+              key: database
+        - name: INTERNAL_TLS_ENABLED
+          value: "true"
+        - name: SCANNER_API_SERVER_ADDR
+          value: :8443
+        - name: SCANNER_API_SERVER_TLS_KEY
+          value: /etc/harbor/ssl/clair/tls.key
+        - name: SCANNER_API_SERVER_TLS_CERTIFICATE
+          value: /etc/harbor/ssl/clair/tls.crt
+        - name: SCANNER_LOG_LEVEL
+          value: info
+        ports:
+        - containerPort: 8443
+        volumeMounts:
+        - name: clair-internal-certs
+          mountPath: /etc/harbor/ssl/clair
+      volumes:
+      - name: config
+        secret:
+          secretName: harbor-clair
+      - name: clair-internal-certs
+        secret:
+          secretName: harbor-clair-internal-tls
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: harbor-clair
+  labels:
+    app: harbor
+  namespace: tanzu-system-registry
+  annotations:
+    kapp.k14s.io/versioned: ""
+type: Opaque
+data:
+  config.yaml: Y2xhaXI6CiAgZGF0YWJhc2U6CiAgICB0eXBlOiBwZ3NxbAogICAgb3B0aW9uczoKICAgICAgc291cmNlOiBwb3N0Z3JlczovL3Bvc3RncmVzOkJxWndlcG9tczNYUFhVZVhAaGFyYm9yLWRhdGFiYXNlOjU0MzIvcG9zdGdyZXM/c3NsbW9kZT1kaXNhYmxlCiAgICAgIGNhY2hlc2l6ZTogMTYzODQKICBhcGk6CiAgICBwb3J0OiA2MDYwCiAgICBoZWFsdGhwb3J0OiA2MDYxCiAgICB0aW1lb3V0OiAzMDBzCiAgdXBkYXRlcjoKICAgIGludGVydmFsOiAxMgo=
+  redis: cmVkaXM6Ly9oYXJib3ItcmVkaXM6NjM3OS80P2lkbGVfdGltZW91dF9zZWNvbmRzPTMw
+  database: cG9zdGdyZXM6Ly9wb3N0Z3JlczpCcVp3ZXBvbXMzWFBYVWVYQGhhcmJvci1kYXRhYmFzZTo1NDMyL3Bvc3RncmVzP3NzbG1vZGU9ZGlzYWJsZQ==
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: harbor-clair
+  labels:
+    app: harbor
+  namespace: tanzu-system-registry
+spec:
+  ports:
+  - name: adapter
+    port: 8443
+  selector:
+    app: harbor
+    component: clair
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: harbor-core
+  labels:
+    app: harbor
+  namespace: tanzu-system-registry
+  annotations:
+    kapp.k14s.io/versioned: ""
+data:
+  app.conf: |
+    appname = Harbor
+    runmode = prod
+    enablegzip = true
+
+    [prod]
+    httpport = 8443
+  PORT: "8443"
+  DATABASE_TYPE: postgresql
+  POSTGRESQL_HOST: harbor-database
+  POSTGRESQL_PORT: "5432"
+  POSTGRESQL_USERNAME: postgres
+  POSTGRESQL_DATABASE: registry
+  POSTGRESQL_SSLMODE: disable
+  POSTGRESQL_MAX_IDLE_CONNS: "50"
+  POSTGRESQL_MAX_OPEN_CONNS: "1000"
+  EXT_ENDPOINT: https://harbor.tkg.io
+  CORE_URL: https://harbor-core:443
+  JOBSERVICE_URL: https://harbor-jobservice
+  REGISTRY_URL: https://harbor-registry:5443
+  TOKEN_SERVICE_URL: https://harbor-core:443/service/token
+  WITH_NOTARY: "True"
+  NOTARY_URL: http://harbor-notary-server:4443
+  CORE_LOCAL_URL: https://127.0.0.1:8443
+  WITH_CLAIR: "True"
+  CLAIR_ADAPTER_URL: https://harbor-clair:8443
+  WITH_TRIVY: "True"
+  TRIVY_ADAPTER_URL: https://harbor-trivy:8443
+  REGISTRY_STORAGE_PROVIDER_NAME: filesystem
+  WITH_CHARTMUSEUM: "false"
+  CHART_REPOSITORY_URL: https://harbor-chartmuseum
+  LOG_LEVEL: info
+  CONFIG_PATH: /etc/core/app.conf
+  CHART_CACHE_DRIVER: redis
+  _REDIS_URL_CORE: redis://harbor-redis:6379/0?idle_timeout_seconds=30
+  _REDIS_URL_REG: redis://harbor-redis:6379/2?idle_timeout_seconds=30
+  PORTAL_URL: https://harbor-portal
+  REGISTRY_CONTROLLER_URL: https://harbor-registry:8443
+  REGISTRY_CREDENTIAL_USERNAME: harbor_registry_user
+  HTTP_PROXY: ""
+  HTTPS_PROXY: ""
+  NO_PROXY: harbor-core,harbor-jobservice,harbor-database,harbor-chartmuseum,harbor-clair,harbor-notary-server,harbor-notary-signer,harbor-registry,harbor-portal,harbor-trivy,127.0.0.1,localhost,.local,.internal
+  PERMITTED_REGISTRY_TYPES_FOR_PROXY_CACHE: docker-hub,harbor
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: harbor-core
+  labels:
+    app: harbor
+    component: core
+  namespace: tanzu-system-registry
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: harbor
+      component: core
+  template:
+    metadata:
+      labels:
+        app: harbor
+        component: core
+    spec:
+      securityContext:
+        fsGroup: 10000
+      containers:
+      - name: core
+        image: harbor-infra.tkg.io/library/harbor/harbor-core:v2.1.3_vmware.1
+        imagePullPolicy: IfNotPresent
+        startupProbe:
+          httpGet:
+            path: /api/v2.0/ping
+            scheme: HTTPS
+            port: 8443
+          failureThreshold: 360
+          initialDelaySeconds: 10
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /api/v2.0/ping
+            scheme: HTTPS
+            port: 8443
+          failureThreshold: 2
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /api/v2.0/ping
+            scheme: HTTPS
+            port: 8443
+          failureThreshold: 2
+          periodSeconds: 10
+        envFrom:
+        - configMapRef:
+            name: harbor-core
+        - secretRef:
+            name: harbor-core
+        env:
+        - name: CORE_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: harbor-core
+              key: secret
+        - name: JOBSERVICE_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: harbor-jobservice
+              key: JOBSERVICE_SECRET
+        - name: INTERNAL_TLS_ENABLED
+          value: "true"
+        - name: INTERNAL_TLS_KEY_PATH
+          value: /etc/harbor/ssl/core/tls.key
+        - name: INTERNAL_TLS_CERT_PATH
+          value: /etc/harbor/ssl/core/tls.crt
+        - name: INTERNAL_TLS_TRUST_CA_PATH
+          value: /etc/harbor/ssl/core/ca.crt
+        - name: TOKEN_PRIVATE_KEY_PATH
+          value: /etc/core/private-key/tls.key
+        ports:
+        - containerPort: 8443
+        volumeMounts:
+        - name: config
+          mountPath: /etc/core/app.conf
+          subPath: app.conf
+        - name: secret-key
+          mountPath: /etc/core/key
+          subPath: key
+        - name: token-service-private-key
+          mountPath: /etc/core/private-key/
+        - name: ca-download
+          mountPath: /etc/core/ca
+        - name: core-internal-certs
+          mountPath: /etc/harbor/ssl/core
+        - name: psc
+          mountPath: /etc/core/token
+      volumes:
+      - name: config
+        configMap:
+          name: harbor-core
+          items:
+          - key: app.conf
+            path: app.conf
+      - name: secret-key
+        secret:
+          secretName: harbor-core
+          items:
+          - key: secretKey
+            path: key
+      - name: token-service-private-key
+        secret:
+          secretName: harbor-token-service
+      - name: ca-download
+        secret:
+          secretName: harbor-tls
+      - name: core-internal-certs
+        secret:
+          secretName: harbor-core-internal-tls
+      - name: psc
+        emptyDir: {}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: harbor-core
+  labels:
+    app: harbor
+  namespace: tanzu-system-registry
+  annotations:
+    kapp.k14s.io/versioned: ""
+type: Opaque
+data:
+  secretKey: MnR3NDZ6NjJxN2JhN1huTw==
+  secret: UjRIdWFHY0REQUoxVUdFMA==
+  HARBOR_ADMIN_PASSWORD: SGFyYm9yMTIzNDU=
+  POSTGRESQL_PASSWORD: QnFad2Vwb21zM1hQWFVlWA==
+  REGISTRY_CREDENTIAL_PASSWORD: aGFyYm9yX3JlZ2lzdHJ5X3Bhc3N3b3Jk
+  CSRF_KEY: eXdyWG84RDcyUUtYTnlDM05WSG9rTkFGTUdSTFZSN1c=
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: harbor-core
+  labels:
+    app: harbor
+  namespace: tanzu-system-registry
+  annotations:
+    projectcontour.io/upstream-protocol.tls: "443"
+spec:
+  ports:
+  - port: 443
+    targetPort: 8443
+  selector:
+    app: harbor
+    component: core
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: harbor-database
+  labels:
+    app: harbor
+  namespace: tanzu-system-registry
+  annotations:
+    kapp.k14s.io/versioned: ""
+type: Opaque
+data:
+  POSTGRES_PASSWORD: QnFad2Vwb21zM1hQWFVlWA==
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: harbor-database
+  labels:
+    app: harbor
+    component: database
+  namespace: tanzu-system-registry
+spec:
+  replicas: 1
+  serviceName: harbor-database
+  selector:
+    matchLabels:
+      app: harbor
+      component: database
+  template:
+    metadata:
+      labels:
+        app: harbor
+        component: database
+    spec:
+      initContainers:
+      - name: change-permission-of-directory
+        securityContext:
+          runAsUser: 0
+        image: harbor-infra.tkg.io/library/harbor/harbor-db:v2.1.3_vmware.1
+        imagePullPolicy: IfNotPresent
+        command:
+        - /bin/sh
+        - -c
+        args:
+        - chown -R postgres:postgres /var/lib/postgresql/data
+        - mv /var/lib/postgresql/data/pg_xlog /var/lib/postgresql/pg_xlog
+        volumeMounts:
+        - name: database-data
+          mountPath: /var/lib/postgresql/data
+          subPath: null
+      - name: remove-lost-found
+        image: harbor-infra.tkg.io/library/harbor/harbor-db:v2.1.3_vmware.1
+        imagePullPolicy: IfNotPresent
+        command:
+        - rm
+        - -Rf
+        - /var/lib/postgresql/data/lost+found
+        volumeMounts:
+        - name: database-data
+          mountPath: /var/lib/postgresql/data
+          subPath: null
+      containers:
+      - name: database
+        image: harbor-infra.tkg.io/library/harbor/harbor-db:v2.1.3_vmware.1
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          exec:
+            command:
+            - /docker-healthcheck.sh
+          initialDelaySeconds: 300
+          periodSeconds: 10
+        readinessProbe:
+          exec:
+            command:
+            - /docker-healthcheck.sh
+          initialDelaySeconds: 1
+          periodSeconds: 10
+        envFrom:
+        - secretRef:
+            name: harbor-database
+        volumeMounts:
+        - name: database-data
+          mountPath: /var/lib/postgresql/data
+          subPath: null
+  volumeClaimTemplates:
+  - metadata:
+      name: database-data
+      labels:
+        app: harbor
+      annotations:
+        kapp.k14s.io/owned-for-deletion: ""
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 1Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: harbor-database
+  labels:
+    app: harbor
+  namespace: tanzu-system-registry
+spec:
+  ports:
+  - port: 5432
+  selector:
+    app: harbor
+    component: database
+---
+apiVersion: projectcontour.io/v1
+kind: HTTPProxy
+metadata:
+  name: harbor-httpproxy
+  namespace: tanzu-system-registry
+  labels:
+    app: harbor
+spec:
+  virtualhost:
+    fqdn: harbor.tkg.io
+    tls:
+      secretName: harbor-tls
+  routes:
+  - conditions:
+    - prefix: /
+    services:
+    - name: harbor-portal
+      port: 443
+  - conditions:
+    - prefix: /api/
+    services:
+    - name: harbor-core
+      port: 443
+  - conditions:
+    - prefix: /service/
+    services:
+    - name: harbor-core
+      port: 443
+  - conditions:
+    - prefix: /v2/
+    services:
+    - name: harbor-core
+      port: 443
+    timeoutPolicy:
+      response: 60s
+  - conditions:
+    - prefix: /chartrepo/
+    services:
+    - name: harbor-core
+      port: 443
+  - conditions:
+    - prefix: /c/
+    services:
+    - name: harbor-core
+      port: 443
+---
+apiVersion: projectcontour.io/v1
+kind: HTTPProxy
+metadata:
+  name: harbor-httpproxy-notary
+  namespace: tanzu-system-registry
+  labels:
+    app: harbor
+spec:
+  virtualhost:
+    fqdn: notary.harbor.tkg.io
+    tls:
+      secretName: harbor-tls
+  routes:
+  - conditions:
+    - prefix: /
+    services:
+    - name: harbor-notary-server
+      port: 4443
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: harbor-jobservice-env
+  labels:
+    app: harbor
+  namespace: tanzu-system-registry
+  annotations:
+    kapp.k14s.io/versioned: ""
+data:
+  CORE_URL: https://harbor-core:443
+  TOKEN_SERVICE_URL: https://harbor-core:443/service/token
+  REGISTRY_URL: https://harbor-registry:5443
+  REGISTRY_CONTROLLER_URL: https://harbor-registry:8443
+  REGISTRY_CREDENTIAL_USERNAME: harbor_registry_user
+  HTTP_PROXY: ""
+  HTTPS_PROXY: ""
+  NO_PROXY: harbor-core,harbor-jobservice,harbor-database,harbor-chartmuseum,harbor-clair,harbor-notary-server,harbor-notary-signer,harbor-registry,harbor-portal,harbor-trivy,127.0.0.1,localhost,.local,.internal
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: harbor-jobservice
+  labels:
+    app: harbor
+  namespace: tanzu-system-registry
+data:
+  config.yml: |
+    #Server listening port
+    protocol: "https"
+    port: 8443
+    https_config:
+      cert: "/etc/harbor/ssl/jobservice/tls.crt"
+      key: "/etc/harbor/ssl/jobservice/tls.key"
+    worker_pool:
+      workers: 10
+      backend: "redis"
+      redis_pool:
+        redis_url: "redis://harbor-redis:6379/1"
+        namespace: "harbor_job_service_namespace"
+        idle_timeout_second: 3600
+    job_loggers:
+      - name: "FILE"
+        level: INFO
+        settings: # Customized settings of logger
+          base_dir: "/var/log/jobs"
+        sweeper:
+          duration: 14 #days
+          settings: # Customized settings of sweeper
+            work_dir: "/var/log/jobs"
+    #Loggers for the job service
+    loggers:
+      - name: "STD_OUTPUT"
+        level: INFO
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: harbor-jobservice
+  labels:
+    app: harbor
+    component: jobservice
+  namespace: tanzu-system-registry
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app: harbor
+      component: jobservice
+  template:
+    metadata:
+      labels:
+        app: harbor
+        component: jobservice
+    spec:
+      securityContext:
+        fsGroup: 10000
+      containers:
+      - name: jobservice
+        image: harbor-infra.tkg.io/library/harbor/harbor-jobservice:v2.1.3_vmware.1
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          httpGet:
+            path: /api/v1/stats
+            scheme: HTTPS
+            port: 8443
+          initialDelaySeconds: 300
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /api/v1/stats
+            scheme: HTTPS
+            port: 8443
+          initialDelaySeconds: 20
+          periodSeconds: 10
+        env:
+        - name: CORE_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: harbor-core
+              key: secret
+        - name: INTERNAL_TLS_ENABLED
+          value: "true"
+        - name: INTERNAL_TLS_KEY_PATH
+          value: /etc/harbor/ssl/jobservice/tls.key
+        - name: INTERNAL_TLS_CERT_PATH
+          value: /etc/harbor/ssl/jobservice/tls.crt
+        - name: INTERNAL_TLS_TRUST_CA_PATH
+          value: /etc/harbor/ssl/jobservice/ca.crt
+        envFrom:
+        - configMapRef:
+            name: harbor-jobservice-env
+        - secretRef:
+            name: harbor-jobservice
+        ports:
+        - containerPort: 8443
+        volumeMounts:
+        - name: jobservice-config
+          mountPath: /etc/jobservice/config.yml
+          subPath: config.yml
+        - name: job-logs
+          mountPath: /var/log/jobs
+          subPath: null
+        - name: jobservice-internal-certs
+          mountPath: /etc/harbor/ssl/jobservice
+      volumes:
+      - name: jobservice-config
+        configMap:
+          name: harbor-jobservice
+      - name: job-logs
+        persistentVolumeClaim:
+          claimName: harbor-jobservice
+      - name: jobservice-internal-certs
+        secret:
+          secretName: harbor-jobservice-internal-tls
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: harbor-jobservice
+  labels:
+    app: harbor
+    component: jobservice
+  namespace: tanzu-system-registry
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: harbor-jobservice
+  labels:
+    app: harbor
+  namespace: tanzu-system-registry
+  annotations:
+    kapp.k14s.io/versioned: ""
+type: Opaque
+data:
+  JOBSERVICE_SECRET: WkJwSzlYZEt0NFJJbDc3UA==
+  REGISTRY_CREDENTIAL_PASSWORD: aGFyYm9yX3JlZ2lzdHJ5X3Bhc3N3b3Jk
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: harbor-jobservice
+  labels:
+    app: harbor
+  namespace: tanzu-system-registry
+spec:
+  ports:
+  - port: 443
+    targetPort: 8443
+  selector:
+    app: harbor
+    component: jobservice
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: harbor-notary-server
+  labels:
+    app: harbor
+    component: notary
+  namespace: tanzu-system-registry
+  annotations:
+    kapp.k14s.io/versioned: ""
+type: Opaque
+data:
+  server.json: eyJhdXRoIjp7Im9wdGlvbnMiOnsiaXNzdWVyIjoiaGFyYm9yLXRva2VuLWlzc3VlciIsInJlYWxtIjoiaHR0cHM6Ly9oYXJib3IudGtnLmlvL3NlcnZpY2UvdG9rZW4iLCJyb290Y2VydGJ1bmRsZSI6Ii9ldGMvc3NsL3Rva2VuLXNlcnZpY2UvdGxzLmNydCIsInNlcnZpY2UiOiJoYXJib3Itbm90YXJ5In0sInR5cGUiOiJ0b2tlbiJ9LCJsb2dnaW5nIjp7ImxldmVsIjoiaW5mbyJ9LCJzZXJ2ZXIiOnsiaHR0cF9hZGRyIjoiOjQ0NDMifSwic3RvcmFnZSI6eyJiYWNrZW5kIjoicG9zdGdyZXMiLCJkYl91cmwiOiJwb3N0Z3JlczovL3Bvc3RncmVzOkJxWndlcG9tczNYUFhVZVhAaGFyYm9yLWRhdGFiYXNlOjU0MzIvbm90YXJ5c2VydmVyP3NzbG1vZGU9ZGlzYWJsZSJ9LCJ0cnVzdF9zZXJ2aWNlIjp7Imhvc3RuYW1lIjoiaGFyYm9yLW5vdGFyeS1zaWduZXIiLCJrZXlfYWxnb3JpdGhtIjoiZWNkc2EiLCJwb3J0IjoiNzg5OSIsInRsc19jYV9maWxlIjoiL2V0Yy9zc2wvbm90YXJ5L2NhLmNydCIsInR5cGUiOiJyZW1vdGUifX0=
+  signer.json: eyJsb2dnaW5nIjp7ImxldmVsIjoiaW5mbyJ9LCJzZXJ2ZXIiOnsiZ3JwY19hZGRyIjoiOjc4OTkiLCJ0bHNfY2VydF9maWxlIjoiL2V0Yy9zc2wvbm90YXJ5L3Rscy5jcnQiLCJ0bHNfa2V5X2ZpbGUiOiIvZXRjL3NzbC9ub3RhcnkvdGxzLmtleSJ9LCJzdG9yYWdlIjp7ImJhY2tlbmQiOiJwb3N0Z3JlcyIsImRiX3VybCI6InBvc3RncmVzOi8vcG9zdGdyZXM6QnFad2Vwb21zM1hQWFVlWEBoYXJib3ItZGF0YWJhc2U6NTQzMi9ub3RhcnlzaWduZXI/c3NsbW9kZT1kaXNhYmxlIiwiZGVmYXVsdF9hbGlhcyI6ImRlZmF1bHRhbGlhcyJ9fQ==
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: harbor-notary-server
+  labels:
+    app: harbor
+    component: notary-server
+  namespace: tanzu-system-registry
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: harbor
+      component: notary-server
+  template:
+    metadata:
+      labels:
+        app: harbor
+        component: notary-server
+    spec:
+      securityContext:
+        fsGroup: 10000
+      containers:
+      - name: notary-server
+        image: harbor-infra.tkg.io/library/harbor/notary-server-photon:v2.1.3_vmware.1
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: MIGRATIONS_PATH
+          value: migrations/server/postgresql
+        - name: DB_URL
+          value: postgres://postgres:BqZwepoms3XPXUeX@harbor-database:5432/notaryserver?sslmode=disable
+        volumeMounts:
+        - name: config
+          mountPath: /etc/notary/server-config.postgres.json
+          subPath: server.json
+        - name: token-service-certificate
+          mountPath: /etc/ssl/token-service/
+        - name: signer-certificate
+          mountPath: /etc/ssl/notary/
+      volumes:
+      - name: config
+        secret:
+          secretName: harbor-notary-server
+      - name: token-service-certificate
+        secret:
+          secretName: harbor-token-service
+      - name: signer-certificate
+        secret:
+          secretName: harbor-notary-signer
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: harbor-notary-signer
+  labels:
+    app: harbor
+    component: notary-signer
+  namespace: tanzu-system-registry
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: harbor
+      component: notary-signer
+  template:
+    metadata:
+      labels:
+        app: harbor
+        component: notary-signer
+    spec:
+      securityContext:
+        fsGroup: 10000
+      containers:
+      - name: notary-signer
+        image: harbor-infra.tkg.io/library/harbor/notary-signer-photon:v2.1.3_vmware.1
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: MIGRATIONS_PATH
+          value: migrations/signer/postgresql
+        - name: DB_URL
+          value: postgres://postgres:BqZwepoms3XPXUeX@harbor-database:5432/notarysigner?sslmode=disable
+        - name: NOTARY_SIGNER_DEFAULTALIAS
+          value: defaultalias
+        volumeMounts:
+        - name: config
+          mountPath: /etc/notary/signer-config.postgres.json
+          subPath: signer.json
+        - name: signer-certificate
+          mountPath: /etc/ssl/notary/
+      volumes:
+      - name: config
+        secret:
+          secretName: harbor-notary-server
+      - name: signer-certificate
+        secret:
+          secretName: harbor-notary-signer
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: harbor-notary-server
+  labels:
+    app: harbor
+  namespace: tanzu-system-registry
+spec:
+  ports:
+  - port: 4443
+  selector:
+    app: harbor
+    component: notary-server
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: harbor-notary-signer
+  labels:
+    app: harbor
+  namespace: tanzu-system-registry
+spec:
+  ports:
+  - port: 7899
+  selector:
+    app: harbor
+    component: notary-signer
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: harbor-portal
+  labels:
+    app: harbor
+  namespace: tanzu-system-registry
+data:
+  nginx.conf: |
+    worker_processes auto;
+    pid /tmp/nginx.pid;
+    events {
+        worker_connections  1024;
+    }
+    http {
+        client_body_temp_path /tmp/client_body_temp;
+        proxy_temp_path /tmp/proxy_temp;
+        fastcgi_temp_path /tmp/fastcgi_temp;
+        uwsgi_temp_path /tmp/uwsgi_temp;
+        scgi_temp_path /tmp/scgi_temp;
+        server {
+            listen 8443 ssl;
+            # SSL
+            ssl_certificate /etc/harbor/ssl/portal/tls.crt;
+            ssl_certificate_key /etc/harbor/ssl/portal/tls.key;
+
+            # Recommendations from https://raymii.org/s/tutorials/Strong_SSL_Security_On_nginx.html
+            ssl_protocols TLSv1.2;
+            ssl_ciphers '!aNULL:kECDH+AESGCM:ECDH+AESGCM:RSA+AESGCM:kECDH+AES:ECDH+AES:RSA+AES:';
+            ssl_prefer_server_ciphers on;
+            ssl_session_cache shared:SSL:10m;
+            server_name  localhost;
+            root   /usr/share/nginx/html;
+            index  index.html index.htm;
+            include /etc/nginx/mime.types;
+            gzip on;
+            gzip_min_length 1000;
+            gzip_proxied expired no-cache no-store private auth;
+            gzip_types text/plain text/css application/json application/javascript application/x-javascript text/xml application/xml application/xml+rss text/javascript;
+            location / {
+                try_files $uri $uri/ /index.html;
+            }
+            location = /index.html {
+                add_header Cache-Control "no-store, no-cache, must-revalidate";
+            }
+        }
+    }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: harbor-portal
+  labels:
+    app: harbor
+    component: portal
+  namespace: tanzu-system-registry
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: harbor
+      component: portal
+  template:
+    metadata:
+      labels:
+        app: harbor
+        component: portal
+    spec:
+      containers:
+      - name: portal
+        image: harbor-infra.tkg.io/library/harbor/harbor-portal:v2.1.3_vmware.1
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          httpGet:
+            path: /
+            scheme: HTTPS
+            port: 8443
+          initialDelaySeconds: 300
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /
+            scheme: HTTPS
+            port: 8443
+          initialDelaySeconds: 1
+          periodSeconds: 10
+        ports:
+        - containerPort: 8443
+        volumeMounts:
+        - name: portal-config
+          mountPath: /etc/nginx/nginx.conf
+          subPath: nginx.conf
+        - name: portal-internal-certs
+          mountPath: /etc/harbor/ssl/portal
+      volumes:
+      - name: portal-config
+        configMap:
+          name: harbor-portal
+      - name: portal-internal-certs
+        secret:
+          secretName: harbor-portal-internal-tls
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: harbor-portal
+  labels:
+    app: harbor
+  namespace: tanzu-system-registry
+  annotations:
+    projectcontour.io/upstream-protocol.tls: "443"
+spec:
+  ports:
+  - port: 443
+    targetPort: 8443
+  selector:
+    app: harbor
+    component: portal
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: harbor-redis
+  labels:
+    app: harbor
+  namespace: tanzu-system-registry
+spec:
+  ports:
+  - port: 6379
+  selector:
+    app: harbor
+    component: redis
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: harbor-redis
+  labels:
+    app: harbor
+    component: redis
+  namespace: tanzu-system-registry
+spec:
+  replicas: 1
+  serviceName: harbor-redis
+  selector:
+    matchLabels:
+      app: harbor
+      component: redis
+  template:
+    metadata:
+      labels:
+        app: harbor
+        component: redis
+    spec:
+      securityContext:
+        fsGroup: 999
+      containers:
+      - name: redis
+        image: harbor-infra.tkg.io/library/harbor/redis-photon:v2.1.3_vmware.1
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          tcpSocket:
+            port: 6379
+          initialDelaySeconds: 300
+          periodSeconds: 10
+        readinessProbe:
+          tcpSocket:
+            port: 6379
+          initialDelaySeconds: 1
+          periodSeconds: 10
+        volumeMounts:
+        - name: data
+          mountPath: /var/lib/redis
+          subPath: null
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+      labels:
+        app: harbor
+      annotations:
+        kapp.k14s.io/owned-for-deletion: ""
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 1Gi
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: harbor-registry
+  labels:
+    app: harbor
+  namespace: tanzu-system-registry
+  annotations:
+    kapp.k14s.io/versioned: ""
+data:
+  config.yml: |
+    version: 0.1
+    log:
+      level: info
+      fields:
+        service: registry
+    storage:
+      filesystem:
+        rootdirectory: /storage
+      cache:
+        layerinfo: redis
+      maintenance:
+        uploadpurging:
+          enabled: false
+      delete:
+        enabled: true
+      redirect:
+        disable: false
+    redis:
+      addr: harbor-redis:6379
+      db: 2
+      readtimeout: 10s
+      writetimeout: 10s
+      dialtimeout: 10s
+    http:
+      addr: :5443
+      relativeurls: false
+      tls:
+        certificate: /etc/harbor/ssl/registry/tls.crt
+        key: /etc/harbor/ssl/registry/tls.key
+        minimumtls: tls1.2
+      debug:
+        addr: localhost:5001
+    auth:
+      htpasswd:
+        realm: harbor-registry-basic-realm
+        path: /etc/registry/passwd
+    validation:
+      disabled: true
+    compatibility:
+      schema1:
+        enabled: true
+  ctl-config.yml: |
+    ---
+    protocol: "https"
+    port: 8443
+    https_config:
+      cert: "/etc/harbor/ssl/registry/tls.crt"
+      key: "/etc/harbor/ssl/registry/tls.key"
+    log_level: info
+    registry_config: "/etc/registry/config.yml"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: harbor-registry
+  labels:
+    app: harbor
+    component: registry
+  namespace: tanzu-system-registry
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app: harbor
+      component: registry
+  template:
+    metadata:
+      labels:
+        app: harbor
+        component: registry
+    spec:
+      securityContext:
+        fsGroup: 10000
+      containers:
+      - name: registry
+        image: harbor-infra.tkg.io/library/harbor/registry-photon:v2.1.3_vmware.1
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          httpGet:
+            path: /
+            scheme: HTTPS
+            port: 5443
+          initialDelaySeconds: 300
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /
+            scheme: HTTPS
+            port: 5443
+          initialDelaySeconds: 1
+          periodSeconds: 10
+        args:
+        - serve
+        - /etc/registry/config.yml
+        envFrom:
+        - secretRef:
+            name: harbor-registry
+        env:
+        - name: INTERNAL_TLS_ENABLED
+          value: "true"
+        - name: INTERNAL_TLS_KEY_PATH
+          value: /etc/harbor/ssl/registry/tls.key
+        - name: INTERNAL_TLS_CERT_PATH
+          value: /etc/harbor/ssl/registry/tls.crt
+        - name: INTERNAL_TLS_TRUST_CA_PATH
+          value: /etc/harbor/ssl/registry/ca.crt
+        ports:
+        - containerPort: 5443
+        - containerPort: 5001
+        volumeMounts:
+        - name: registry-data
+          mountPath: /storage
+          subPath: null
+        - name: registry-htpasswd
+          mountPath: /etc/registry/passwd
+          subPath: passwd
+        - name: registry-config
+          mountPath: /etc/registry/config.yml
+          subPath: config.yml
+        - name: registry-internal-certs
+          mountPath: /etc/harbor/ssl/registry
+      - name: registryctl
+        image: harbor-infra.tkg.io/library/harbor/harbor-registryctl:v2.1.3_vmware.1
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          httpGet:
+            path: /api/health
+            scheme: HTTPS
+            port: 8443
+          initialDelaySeconds: 300
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /api/health
+            scheme: HTTPS
+            port: 8443
+          initialDelaySeconds: 1
+          periodSeconds: 10
+        envFrom:
+        - secretRef:
+            name: harbor-registry
+        env:
+        - name: CORE_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: harbor-core
+              key: secret
+        - name: JOBSERVICE_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: harbor-jobservice
+              key: JOBSERVICE_SECRET
+        - name: INTERNAL_TLS_ENABLED
+          value: "true"
+        - name: INTERNAL_TLS_KEY_PATH
+          value: /etc/harbor/ssl/registry/tls.key
+        - name: INTERNAL_TLS_CERT_PATH
+          value: /etc/harbor/ssl/registry/tls.crt
+        - name: INTERNAL_TLS_TRUST_CA_PATH
+          value: /etc/harbor/ssl/registry/ca.crt
+        ports:
+        - containerPort: 8443
+        volumeMounts:
+        - name: registry-data
+          mountPath: /storage
+          subPath: null
+        - name: registry-config
+          mountPath: /etc/registry/config.yml
+          subPath: config.yml
+        - name: registry-config
+          mountPath: /etc/registryctl/config.yml
+          subPath: ctl-config.yml
+        - name: registry-internal-certs
+          mountPath: /etc/harbor/ssl/registry
+      volumes:
+      - name: registry-htpasswd
+        secret:
+          secretName: harbor-registry
+          items:
+          - key: REGISTRY_HTPASSWD
+            path: passwd
+      - name: registry-config
+        configMap:
+          name: harbor-registry
+      - name: registry-data
+        persistentVolumeClaim:
+          claimName: harbor-registry
+      - name: registry-internal-certs
+        secret:
+          secretName: harbor-registry-internal-tls
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: harbor-registry
+  labels:
+    app: harbor
+    component: registry
+  namespace: tanzu-system-registry
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: harbor-registry
+  labels:
+    app: harbor
+  namespace: tanzu-system-registry
+  annotations:
+    kapp.k14s.io/versioned: ""
+type: Opaque
+data:
+  REGISTRY_HTPASSWD: aGFyYm9yX3JlZ2lzdHJ5X3VzZXI6JDJ5JDEwJDlMNFRjMERKYkZGTUI2UmRTQ3Vuck9wVEhkd2hpZDRrdEJKbUxEMDBiWWdxa2tHT3ZsbDNt
+  REGISTRY_HTTP_SECRET: d25PT1Vad3plRjZGR2taZQ==
+  REGISTRY_REDIS_PASSWORD: ""
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: harbor-registry
+  labels:
+    app: harbor
+  namespace: tanzu-system-registry
+spec:
+  ports:
+  - name: registry
+    port: 5443
+  - name: controller
+    port: 8443
+  selector:
+    app: harbor
+    component: registry
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: harbor-trivy
+  labels:
+    app: harbor
+  namespace: tanzu-system-registry
+  annotations:
+    kapp.k14s.io/versioned: ""
+type: Opaque
+data:
+  redisURL: cmVkaXM6Ly9oYXJib3ItcmVkaXM6NjM3OS81P2lkbGVfdGltZW91dF9zZWNvbmRzPTMw
+  gitHubToken: ""
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: harbor-trivy
+  labels:
+    app: harbor
+    component: trivy
+  namespace: tanzu-system-registry
+spec:
+  replicas: 1
+  serviceName: harbor-trivy
+  selector:
+    matchLabels:
+      app: harbor
+      component: trivy
+  template:
+    metadata:
+      labels:
+        app: harbor
+        component: trivy
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10000
+        fsGroup: 10000
+      automountServiceAccountToken: false
+      containers:
+      - name: trivy
+        image: harbor-infra.tkg.io/library/harbor/trivy-adapter-photon:v2.1.3_vmware.1
+        imagePullPolicy: IfNotPresent
+        securityContext:
+          privileged: false
+          allowPrivilegeEscalation: false
+        env:
+        - name: HTTP_PROXY
+          value: ""
+        - name: HTTPS_PROXY
+          value: ""
+        - name: NO_PROXY
+          value: harbor-core,harbor-jobservice,harbor-database,harbor-chartmuseum,harbor-clair,harbor-notary-server,harbor-notary-signer,harbor-registry,harbor-portal,harbor-trivy,127.0.0.1,localhost,.local,.internal
+        - name: SCANNER_LOG_LEVEL
+          value: info
+        - name: SCANNER_TRIVY_CACHE_DIR
+          value: /home/scanner/.cache/trivy
+        - name: SCANNER_TRIVY_REPORTS_DIR
+          value: /home/scanner/.cache/reports
+        - name: SCANNER_TRIVY_DEBUG_MODE
+          value: "false"
+        - name: SCANNER_TRIVY_VULN_TYPE
+          value: os,library
+        - name: SCANNER_TRIVY_GITHUB_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: harbor-trivy
+              key: gitHubToken
+        - name: SCANNER_TRIVY_SEVERITY
+          value: UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL
+        - name: SCANNER_TRIVY_IGNORE_UNFIXED
+          value: "false"
+        - name: SCANNER_TRIVY_SKIP_UPDATE
+          value: "false"
+        - name: SCANNER_TRIVY_INSECURE
+          value: "false"
+        - name: SCANNER_API_SERVER_ADDR
+          value: :8443
+        - name: INTERNAL_TLS_ENABLED
+          value: "true"
+        - name: SCANNER_API_SERVER_TLS_KEY
+          value: /etc/harbor/ssl/trivy/tls.key
+        - name: SCANNER_API_SERVER_TLS_CERTIFICATE
+          value: /etc/harbor/ssl/trivy/tls.crt
+        - name: SCANNER_REDIS_URL
+          valueFrom:
+            secretKeyRef:
+              name: harbor-trivy
+              key: redisURL
+        - name: SCANNER_STORE_REDIS_URL
+          valueFrom:
+            secretKeyRef:
+              name: harbor-trivy
+              key: redisURL
+        - name: SCANNER_JOB_QUEUE_REDIS_URL
+          valueFrom:
+            secretKeyRef:
+              name: harbor-trivy
+              key: redisURL
+        ports:
+        - name: api-server
+          containerPort: 8443
+        volumeMounts:
+        - name: data
+          mountPath: /home/scanner/.cache
+          subPath: null
+          readOnly: false
+        - name: trivy-internal-certs
+          mountPath: /etc/harbor/ssl/trivy
+        livenessProbe:
+          httpGet:
+            scheme: HTTPS
+            path: /probe/healthy
+            port: api-server
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          successThreshold: 1
+          failureThreshold: 10
+        readinessProbe:
+          httpGet:
+            scheme: HTTPS
+            path: /probe/ready
+            port: api-server
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          successThreshold: 1
+          failureThreshold: 3
+        resources:
+          limits:
+            cpu: 1
+            memory: 1Gi
+          requests:
+            cpu: 200m
+            memory: 512Mi
+      volumes:
+      - name: trivy-internal-certs
+        secret:
+          secretName: harbor-trivy-internal-tls
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+      labels:
+        app: harbor
+      annotations:
+        kapp.k14s.io/owned-for-deletion: ""
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 5Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: harbor-trivy
+  labels:
+    app: harbor
+  namespace: tanzu-system-registry
+spec:
+  ports:
+  - name: api-server
+    protocol: TCP
+    port: 8443
+  selector:
+    app: harbor
+    component: trivy

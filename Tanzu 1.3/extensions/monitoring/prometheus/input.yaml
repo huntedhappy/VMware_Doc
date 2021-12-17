@@ -1,0 +1,1 @@
+ytt --ignore-unknown-comments -f ../../../common -f ../../../monitoring/prometheus -f prometheus-data-values.yaml -f custom.yaml > output.yaml

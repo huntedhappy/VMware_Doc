@@ -1,0 +1,1 @@
+ ytt --ignore-unknown-comments -f ../../../common -f ../../../logging/fluent-bit -f elasticsearch/fluent-bit-data-values.yaml -f custom.yaml > output.yaml

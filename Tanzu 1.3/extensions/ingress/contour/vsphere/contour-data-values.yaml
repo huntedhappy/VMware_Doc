@@ -1,0 +1,15 @@
+#@data/values
+#@overlay/match-child-defaults missing_ok=True
+---
+infrastructure_provider: "vsphere"
+contour:
+  image:
+    repository: harbor-infra.tkg.io/library
+  certificate:
+    duration: 87600h
+envoy:
+  image:
+    repository: harbor-infra.tkg.io/library
+    tag: v1.17.3_vmware.1  
+  service:
+    type: "LoadBalancer"

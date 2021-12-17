@@ -1,0 +1,17 @@
+#@data/values
+#@overlay/match-child-defaults missing_ok=True
+---
+monitoring:
+  grafana:
+    ingress:
+      virtual_host_fqdn: grafana.tkg.io
+    image:
+      repository: harbor-infra.tkg.io/library/grafana
+    secret:
+      admin_password: T3BlbmJhc2UhMjM0
+  grafana_init_container:
+    image:
+      repository: harbor-infra.tkg.io/library/grafana
+  grafana_sc_dashboard:
+    image:
+      repository: harbor-infra.tkg.io/library/grafana

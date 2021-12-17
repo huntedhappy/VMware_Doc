@@ -1,0 +1,33 @@
+#@data/values
+#@overlay/match-child-defaults missing_ok=True
+---
+monitoring:
+  ingress:
+    enabled: true
+    virtual_host_fqdn: "prometheus.tkg.io"
+    prometheus_prefix: "/"
+    alertmanager_prefix: "/alertmanager/"        
+  prometheus_server:
+    image:
+      repository: harbor-infra.tkg.io/library/prometheus
+  alertmanager:
+    image:
+      repository: harbor-infra.tkg.io/library/prometheus
+  kube_state_metrics:
+    image:
+      repository: harbor-infra.tkg.io/library/prometheus
+  node_exporter:
+    image:
+      repository: harbor-infra.tkg.io/library/prometheus
+  pushgateway:
+    image:
+      repository: harbor-infra.tkg.io/library/prometheus
+  cadvisor:
+    image:
+      repository: harbor-infra.tkg.io/library/prometheus
+  prometheus_server_configmap_reload:
+    image:
+      repository: harbor-infra.tkg.io/library/prometheus
+  prometheus_server_init_container:
+    image:
+      repository: harbor-infra.tkg.io/library/prometheus

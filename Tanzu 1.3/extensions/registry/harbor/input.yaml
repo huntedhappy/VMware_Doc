@@ -1,0 +1,2 @@
+ytt --ignore-unknown-comments -f ../../../common -f ../../../registry/harbor -f harbor-data-values.yaml -f custom.yaml > output.yaml
+#ytt --ignore-unknown-comments -f ../../../common -f ../../../registry/harbor -f harbor-data-values.yaml > output.yaml

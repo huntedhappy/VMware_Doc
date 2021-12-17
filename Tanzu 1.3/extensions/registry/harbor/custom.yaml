@@ -1,0 +1,15 @@
+#@ load("@ytt:overlay", "overlay")
+#@overlay/match by=overlay.subset({"kind": "StatefulSet", "metadata": {"name": "harbor-database"}})
+---
+              spec:
+                template:
+                  spec:
+                    initContainers:
+                      #@overlay/match by=overlay.index(0)
+                      - name: "change-permission-of-directory"
+                        #@overlay/match, expects="0+"
+                        #@overlay/replace
+                        command: ["/bin/sh","-c"]
+                        #@overlay/replace
+                        args: ["chown -R postgres:postgres /var/lib/postgresql/data", "mv /var/lib/postgresql/data/pg_xlog /var/lib/postgresql/pg_xlog"]
+
