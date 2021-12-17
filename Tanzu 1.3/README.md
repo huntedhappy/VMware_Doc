@@ -1,6 +1,6 @@
 Extension Package Install Guide
 
-![design](https://user-images.githubusercontent.com/62123205/142993901-81e2692e-a8b4-4313-927c-27fac591384f.png)
+![KakaoTalk_20211216_132410583](https://user-images.githubusercontent.com/62123205/146474703-e8278c84-cdb5-45a4-98ca-d9971902fb0e.png)
 
 ## YTT TEST
 ytt --ignore-unknown-comments -f ../../../common -f ../../../ingress/contour -f contour-data-values.yaml
